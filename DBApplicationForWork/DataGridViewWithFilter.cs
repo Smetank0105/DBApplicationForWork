@@ -107,9 +107,15 @@ namespace DBApplicationForWork
 		public string valueString { get; set; }
 		public bool check {  get; set; }
 	}
+	class FilterString
+	{
+		public string columnName { get; set; }
+		public string valueString { get; set; }
+	}
 	public class DataGridViewWithFilter : DataGridView
 	{
 		List<FilterStatus> Filter = new List<FilterStatus>();
+		//List<FilterString> FilterString = new List<FilterString>();
 		TextBox textBox = new TextBox();
 		DateTimePicker dateTimePicker = new DateTimePicker();
 		CheckedListBox checkBox = new CheckedListBox();
@@ -228,12 +234,12 @@ namespace DBApplicationForWork
 			{
 				if(e.NewValue == CheckState.Checked)
 				{
-					for(int i = 1;i<checkBox.Items.Count; i++)
+					for(int i = 1; i < checkBox.Items.Count; i++)
 						checkBox.SetItemChecked(i, true);
 				}
 				else
 				{
-					for(int i = 1;i< checkBox.Items.Count; i++)
+					for(int i = 1; i < checkBox.Items.Count; i++)
 						checkBox.SetItemChecked(i, false);
 				}
 			}
