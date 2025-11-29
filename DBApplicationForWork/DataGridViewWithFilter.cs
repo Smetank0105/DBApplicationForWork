@@ -107,15 +107,9 @@ namespace DBApplicationForWork
 		public string valueString { get; set; }
 		public bool check {  get; set; }
 	}
-	class FilterString
-	{
-		public string columnName { get; set; }
-		public string valueString { get; set; }
-	}
 	public class DataGridViewWithFilter : DataGridView
 	{
 		List<FilterStatus> Filter = new List<FilterStatus>();
-		//List<FilterString> FilterString = new List<FilterString>();
 		TextBox textBox = new TextBox();
 		DateTimePicker dateTimePicker = new DateTimePicker();
 		CheckedListBox checkBox = new CheckedListBox();
@@ -225,7 +219,7 @@ namespace DBApplicationForWork
 			popup.Items.Add(host4);
 
 			popup.Show(this, e.ButtonRectangle.X, e.ButtonRectangle.Bottom);
-			host2.Focus();
+			host1.Focus();
 		}
 
 		void checkBox_ItemCheck(object sender, ItemCheckEventArgs e)
@@ -253,23 +247,13 @@ namespace DBApplicationForWork
 		}
 		void textBox_TextChanged(object sender, EventArgs e)
 		{
-			(this.DataSource as DataTable).DefaultView.RowFilter = string.Format
-																			(
-																			"convert([" 
-																			+ this.Columns[columnIndex].Name 
-																			+ "], 'System.String') LIKE '%{0}%'",
-																			textBox.Text
-																			);
+			strFilter = string.Format("convert([" + this.Columns[columnIndex].Name + "], 'System.String') LIKE '%{0}%'", textBox.Text);
+			ApplyFilter();
 		}
 		void dateTimePicker_TextChanged(object sender, EventArgs e)
 		{
-			(this.DataSource as DataTable).DefaultView.RowFilter = string.Format
-																			(
-																			"convert([" 
-																			+ this.Columns[columnIndex].Name 
-																			+ "], 'System.String') LIKE '%{0}%'",
-																			dateTimePicker.Text
-																			);
+			(this.DataSource as DataTable).DefaultView.RowFilter = 
+				string.Format("convert([" + this.Columns[columnIndex].Name + "], 'System.String') LIKE '%{0}%'", dateTimePicker.Text);
 		}
 		void btnApply_Click(object sender, EventArgs e)
 		{
