@@ -111,7 +111,6 @@ namespace DBApplicationForWork
 	{
 		List<FilterStatus> Filter = new List<FilterStatus>();
 		TextBox textBox = new TextBox();
-		DateTimePicker dateTimePicker = new DateTimePicker();
 		CheckedListBox checkBox = new CheckedListBox();
 		Button btnApply = new Button();
 		Button btnClear = new Button();
@@ -145,12 +144,6 @@ namespace DBApplicationForWork
 			textBox.Size = new System.Drawing.Size(widthTool, 30);
 			textBox.TextChanged -= textBox_TextChanged;
 			textBox.TextChanged += textBox_TextChanged;
-
-			dateTimePicker.Size = new System.Drawing.Size(widthTool, 30);
-			dateTimePicker.Format = DateTimePickerFormat.Custom;
-			dateTimePicker.CustomFormat = "dd.MM.yyyy";
-			dateTimePicker.TextChanged -= dateTimePicker_TextChanged;
-			dateTimePicker.TextChanged += dateTimePicker_TextChanged;
 
 			checkBox.ItemCheck -= checkBox_ItemCheck;
 			checkBox.ItemCheck += checkBox_ItemCheck;
@@ -199,21 +192,7 @@ namespace DBApplicationForWork
 			host4.AutoSize = false;
 			host4.Size = btnClear.Size;
 
-			ToolStripControlHost host5 = new ToolStripControlHost(dateTimePicker);
-			host5.Margin = Padding.Empty;
-			host5.Padding = Padding.Empty;
-			host5.AutoSize = false;
-			host5.Size = dateTimePicker.Size;
-
-			switch (this.Columns[columnIndex].ValueType.ToString())
-			{
-				case "System.DateTime":
-					popup.Items.Add(host5);
-					break;
-				default:
-					popup.Items.Add(host1);
-					break;
-			}
+			popup.Items.Add(host1);
 			popup.Items.Add(host2);
 			popup.Items.Add(host3);
 			popup.Items.Add(host4);
@@ -247,13 +226,7 @@ namespace DBApplicationForWork
 		}
 		void textBox_TextChanged(object sender, EventArgs e)
 		{
-			strFilter = string.Format("convert([" + this.Columns[columnIndex].Name + "], 'System.String') LIKE '%{0}%'", textBox.Text);
-			ApplyFilter();
-		}
-		void dateTimePicker_TextChanged(object sender, EventArgs e)
-		{
-			(this.DataSource as DataTable).DefaultView.RowFilter = 
-				string.Format("convert([" + this.Columns[columnIndex].Name + "], 'System.String') LIKE '%{0}%'", dateTimePicker.Text);
+			GetChkFilter();
 		}
 		void btnApply_Click(object sender, EventArgs e)
 		{
@@ -267,10 +240,10 @@ namespace DBApplicationForWork
 			List<string> ValueCellList = new List<string>();
 			string Value;
 
-			foreach(DataGridViewRow row in this.Rows)
+			foreach (DataGridViewRow row in this.Rows)
 			{
 				Value = row.Cells[e].Value.ToString();
-				if(!ValueCellList.Contains(Value))
+				if (!ValueCellList.Contains(Value))
 					ValueCellList.Add(row.Cells[e].Value.ToString());
 			}
 			return ValueCellList;
@@ -303,16 +276,21 @@ namespace DBApplicationForWork
 			List<FilterStatus> ChkList = new List<FilterStatus>();
 			List<FilterStatus> ChkListSort = new List<FilterStatus>();
 			
+			checkBox.Items.Clear();
+
 			foreach(FilterStatus i in Filter)
 			{
-				if (this.Columns[columnIndex].Name == i.columnName)
+				if (this.Columns[columnIndex].Name == i.columnName && i.valueString.IndexOf(textBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
 					ChkList.Add(new FilterStatus() { columnName = "", valueString = i.valueString, check = i.check });
 			}
 			foreach(string ValueCell in GetDataColumns(columnIndex))
 			{
-				int index = ChkList.FindIndex(item => item.valueString == ValueCell);
-				if (index == -1)
-					ChkList.Add(new FilterStatus { valueString = ValueCell, check = true });
+				if (ValueCell.IndexOf(textBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
+				{
+					int index = ChkList.FindIndex(item => item.valueString == ValueCell);
+					if (index == -1)
+						ChkList.Add(new FilterStatus { valueString = ValueCell, check = true });
+				}
 			}
 			checkBox.Items.Add(checkAlltxt, CheckState.Indeterminate);
 
@@ -333,9 +311,9 @@ namespace DBApplicationForWork
 					foreach(FilterStatus i in ChkListSort)
 					{
 						if (i.check == true)
-							checkBox.Items.Add(DateTime.Parse(i.valueString).ToString("dd.MM.yyyy"), CheckState.Checked);
+							checkBox.Items.Add(i.valueString, CheckState.Checked);
 						else
-							checkBox.Items.Add(DateTime.Parse(i.valueString).ToString("dd.MM.yyyy"), CheckState.Unchecked);
+							checkBox.Items.Add(i.valueString, CheckState.Unchecked);
 					}
 					break;
 				default:
