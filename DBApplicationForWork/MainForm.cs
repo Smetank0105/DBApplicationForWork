@@ -16,11 +16,14 @@ namespace DBApplicationForWork
 {
 	public partial class MainForm : Form
 	{
+		Connector connector;
+
+		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
-		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать"};
-		string[] state_names = new string[] { "на исполнении", "на отправку в фирму", "в фирме", "готов", "списание"};
-		Color[] state_colors = new Color[] { Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.White};
+		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
+		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "списание"};
+		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.White};
 		string[] field_names = new string[] 
 		{
 			"ID",
@@ -31,32 +34,34 @@ namespace DBApplicationForWork
 			"название оборудования",
 			"инвенратный номер",
 			"замечания",
-			"передача в фирму",
+			"дата передачи в фирму",
 			"номер акта фирмы",
 			"дата готовности",
 			"статус"
 		};
 		const string font_name = "Arial";
 		const int font_size = 12;
+
 		public MainForm()
 		{
 			InitializeComponent();
+			this.Load += new System.EventHandler(this.MainForm_Load);
 		}
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
+			connector = new Connector(connectionString);
 			initComponents();
 		}
 
 		void initComponents()
 		{
 			this.Size = new Size(1000, 700);
-			Control ctrl;
 
-			//Create TabControl "tcPanel" with TabPages "tpMain" and "tpView"
+//Create TabControl "tcPanel" with TabPages "tpMain" and "tpView"
 			TabControl tcPanel = new TabControl();
 			tcPanel.Dock = DockStyle.Top;
-			tcPanel.Height = 100;
+			tcPanel.Height = 105;
 			tcPanel.SizeMode = TabSizeMode.Fixed;
 			tcPanel.ItemSize = new Size(300, 20);
 			
@@ -67,7 +72,24 @@ namespace DBApplicationForWork
 
 			this.Controls.Add(tcPanel);
 
-			//Create TabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
+//Create LayoutPanel for "tpPanelMain" and "tpPanelView"
+			FlowLayoutPanel flpMain = new FlowLayoutPanel();
+			flpMain.Dock = DockStyle.Fill;
+			flpMain.AutoScroll = true;
+			flpMain.WrapContents = false;
+			flpMain.FlowDirection = FlowDirection.LeftToRight;
+			flpMain.Padding = new Padding(15);
+			tpPanelMain.Controls.Add(flpMain);
+
+			TableLayoutPanel tlpView = new TableLayoutPanel();
+			tlpView.Dock = DockStyle.Fill;
+			tlpView.AutoScroll = true;
+			tlpView.Padding = new Padding(10);
+			tlpView.RowCount = 2;
+			tlpView.ColumnCount = field_names.Length - 1;
+			tpPanelView.Controls.Add(tlpView);
+
+//Create TabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
 			TabControl tcDataBase = new TabControl();
 			tcDataBase.Bounds = new Rectangle(0, 100, 985, 560);
 			tcDataBase.Anchor = (AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right) | AnchorStyles.Bottom);
@@ -84,66 +106,45 @@ namespace DBApplicationForWork
 
 			this.Controls.Add(tcDataBase);
 
-			//Create Buttons for "tcPanel->tpMain"
-			addMainButtons(tpPanelMain);
+//Create Buttons for "tcPanel->tpMain"
+			addMainButtons(flpMain);
 
-			//Create DataGridViewWithFilter for all TabPages in "tcDataBase"
+//Create DataGridViewWithFilter for all TabPages in "tcDataBase"
 			addDataGridViewWithFilters(tcDataBase);
 
-			//Create TextBox and CheckBox for "tcPnale->tpView"
-			addViewTextBoxes(tpPanelView);
-			addViewCheckBoxes(tpPanelView);
-
-			//Bound ContextMenuStrip for "tpMain"
-			ctrl = Controls.Find("btnEditFields", true).FirstOrDefault();
-			(ctrl as Button).Click += new EventHandler(btnMainEditFileds_Click);
-
-			ctrl = Controls.Find("btnChangeStates", true).FirstOrDefault();
-			(ctrl as Button).Click += new EventHandler(btnMainChangeStates_Click);
-
-			ctrl = Controls.Find("btnPrint", true).FirstOrDefault();
-			(ctrl as Button).Click += new EventHandler(btnMainPrint_Click);
-
-			//test table
-			DataTable dt = new DataTable();
-			dt.Columns.Add("Number", typeof(int));
-			dt.Columns.Add("Name");
-			dt.Columns.Add("Date", typeof(DateTime));
-			dt.Columns.Add("Ver");
-			dt.Rows.Add("1", "Ubuntu", "13.10.2011", "11.10");
-			dt.Rows.Add("2", "Ubuntu LTS", "18.10.2012", "12.04");
-			dt.Rows.Add("3", "Ubuntu", "18.10.2012", "12.10");
-			dt.Rows.Add("4", "Ubuntu", "25.04.2012", "13.04");
-			dt.Rows.Add("5", "Ubuntu", "17.10.2013", "13.10");
-			dt.Rows.Add("6", "Ubuntu LTS", "23.04.2014", "14.04");
-			dt.Rows.Add("7", "Ubuntu", "23.10.2014", "14.10");
-			dt.Rows.Add("8", "Ubuntu", "23.04.2015", "15.04");
-			DataSet ds = new DataSet();
-			ds.Tables.Add(dt);
-			Control dgCartridges = Controls.Find("dgCartridges", true).FirstOrDefault();
-			(dgCartridges as DataGridViewWithFilter).DataSource = ds.Tables[0];
+//Create TextBox and CheckBox for "tcPnale->tpView"
+			addViewCheckBoxes(tlpView);
+			addViewTextBoxes(tlpView);
 		}
-		void addMainButtons(TabPage tp)
+		void addMainButtons(FlowLayoutPanel flp)
 		{
 			int btnWidth = 150;
 			int btnHeight = 40;
-			int btnSpacing = 30;
-			int btnStartX = 15;
-			int btnStartY = 15;
 
 			Button[] buttonsMain = new Button[]
 			{
 				new Button {Text = panel_btn_names[0], Name = "btnNewOrder", Font = new Font(font_name, font_size)},
 				new Button {Text = panel_btn_names[1], Name = "btnEditFields", Font = new Font(font_name, font_size)},
 				new Button {Text = panel_btn_names[2], Name = "btnChangeStates", Font = new Font(font_name, font_size)},
-				new Button {Text = panel_btn_names[3], Name = "btnPrint", Font = new Font(font_name, font_size)}
+				new Button {Text = panel_btn_names[3], Name = "btnPrint", Font = new Font(font_name, font_size)},
+				new Button {Text = panel_btn_names[4], Name = "btnRefresh", Font = new Font(font_name, font_size)},
+				new Button {Text = panel_btn_names[5], Name = "btnDelete", Font = new Font(font_name, font_size)}
 			};
 			for (int i = 0; i < buttonsMain.Length; i++)
 			{
+				if(i == 5)
+				{
+					Panel spacer = new Panel();
+					spacer.Size = new Size(Screen.PrimaryScreen.Bounds.Width - btnWidth * 7, btnHeight);
+					spacer.Visible = true;
+					flp.Controls.Add(spacer);
+				}
 				buttonsMain[i].Size = new Size(btnWidth, btnHeight);
-				buttonsMain[i].Location = new Point(btnStartX + i * (btnWidth + btnSpacing), btnStartY);
-				tp.Controls.Add(buttonsMain[i]);
+				flp.Controls.Add(buttonsMain[i]);
 			}
+			buttonsMain[1].Click += new EventHandler(btnMainEditFileds_Click);
+			buttonsMain[2].Click += new EventHandler(btnMainChangeStates_Click);
+			buttonsMain[3].Click += new EventHandler(btnMainPrint_Click);
 		}
 		void addDataGridViewWithFilters(TabControl tc)
 		{
@@ -160,16 +161,22 @@ namespace DBApplicationForWork
 				dGrids[i].AllowUserToDeleteRows = false;
 				dGrids[i].ReadOnly = true;
 				dGrids[i].SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+				dGrids[i].AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+				dGrids[i].CellContextMenuStripNeeded += new DataGridViewCellContextMenuStripNeededEventHandler(dataGridView_CellContextMenuNeeded);
 				tc.TabPages[i].Controls.Add(dGrids[i]);
 			}
+			dGrids[0].DataSource = connector.SelectCartridgeRecords();
+			for (int i = 0; i < dGrids.Length; i++)
+			{ 
+				for (int j = 0; j < dGrids[i].ColumnCount; j++)
+					dGrids[i].Columns[j].SortMode = DataGridViewColumnSortMode.NotSortable;
+				if (dGrids[i].Columns.Count > 0)dGrids[i].Columns[0].Visible = false;
+			}
 		}
-		void addViewTextBoxes(TabPage tp)
+		void addViewTextBoxes(TableLayoutPanel tlp)
 		{
-			int tbWidth = 140;
+			int tbWidth = 160;
 			int tbHeight = 20;
-			int tbSpacing = 20;
-			int tbStartX = 15;
-			int tbStartY = 45;
 
 			TextBox[] tbViews = new TextBox[]
 			{
@@ -188,17 +195,13 @@ namespace DBApplicationForWork
 			for (int i = 0; i < tbViews.Length; i++)
 			{
 				tbViews[i].Size = new Size(tbWidth, tbHeight);
-				tbViews[i].Location = new Point(tbStartX + i * (tbWidth + tbSpacing), tbStartY);
-				tp.Controls.Add(tbViews[i]);
+				tlp.Controls.Add(tbViews[i]);
 			}
 		}
-		void addViewCheckBoxes(TabPage tp)
+		void addViewCheckBoxes(TableLayoutPanel tlp)
 		{
-			int cbWidth = 140;
+			int cbWidth = 160;
 			int cbHeight = 20;
-			int cbSpacing = 20;
-			int cbStartX = 15;
-			int cbStartY = 15;
 
 			CheckBox[] cbViews = new CheckBox[]
 			{
@@ -217,12 +220,14 @@ namespace DBApplicationForWork
 			for (int i = 0;  i < cbViews.Length; i++)
 			{
 				cbViews[i].Size = new Size(cbWidth, cbHeight);
-				cbViews[i].Location = new Point(cbStartX + i * (cbWidth + cbSpacing), cbStartY);
 				cbViews[i].CheckState = CheckState.Checked;
-				tp.Controls.Add(cbViews[i]);
+				tlp.Controls.Add(cbViews[i]);
 			}
 		}
-		ContextMenuStrip ShowMainEditFieldsMenuStrip()
+
+//ContextMenuStrip
+
+		ContextMenuStrip showMainEditFieldsMenuStrip()
 		{
 			ContextMenuStrip cms = new ContextMenuStrip();
 			cms.Name = "cmsMainEF";
@@ -237,14 +242,14 @@ namespace DBApplicationForWork
 				item.Padding = new Padding(0, 2, 0, 2);
 			return cms;
 		}
-		ContextMenuStrip ShowMainChangeStatesMenuStrip()
+		ContextMenuStrip showMainChangeStatesMenuStrip()
 		{
 			ContextMenuStrip cms = new ContextMenuStrip();
 			cms.Name = "cmsMainCS";
 			cms.Font = new Font(font_name, font_size);
 			cms.ShowImageMargin = false;
 			cms.ShowCheckMargin = false;
-			for(int i = 0; i < state_names.Length;  i++)
+			for(int i = 1; i < state_names.Length;  i++)
 			{
 				ToolStripMenuItem item = new ToolStripMenuItem(state_names[i]);
 				item.BackColor = state_colors[i];
@@ -253,7 +258,7 @@ namespace DBApplicationForWork
 			}
 			return cms;
 		}
-		ContextMenuStrip ShowMainPrintMenuStrip()
+		ContextMenuStrip showMainPrintMenuStrip()
 		{
 			ContextMenuStrip cms = new ContextMenuStrip();
 			cms.Name = "cmsMainP";
@@ -266,26 +271,59 @@ namespace DBApplicationForWork
 				item.Padding = new Padding(0, 2, 0, 2);
 			return cms;
 		}
+		ContextMenuStrip showDataBaseMenuStrip()
+		{
+			ContextMenuStrip cms = new ContextMenuStrip();
+			cms.Name = "cmsDataBase";
+			cms.Font = new Font(font_name, font_size);
+			cms.ShowImageMargin = false;
+			cms.ShowCheckMargin = false;
+			ToolStripMenuItem editMenu = new ToolStripMenuItem(panel_btn_names[1]);
+			for(int i = 1; i < field_names.Length; i++)
+				editMenu.DropDownItems.Add(field_names[i]);
+			cms.Items.Add(editMenu);
+			ToolStripMenuItem stateMenu = new ToolStripMenuItem(panel_btn_names[2]);
+			for(int i = 1; i < state_names.Length; i++)
+				stateMenu.DropDownItems.Add(state_names[i]);
+			cms.Items.Add(stateMenu);
+			ToolStripMenuItem refreshMenu = new ToolStripMenuItem(panel_btn_names[4]);
+			cms.Items.Add(refreshMenu);
+			foreach (ToolStripItem item in cms.Items)
+				item.Padding = new Padding(0, 2, 0, 2);
+			return cms;
+		}
 
-		//			Events
+//Events
 
 		void btnMainEditFileds_Click(object sender, EventArgs e)
 		{
-			ContextMenuStrip cms = ShowMainEditFieldsMenuStrip();
+			ContextMenuStrip cms = showMainEditFieldsMenuStrip();
 			Button btn = (sender as Button);
 			cms.Show(btn, new Point(0, btn.Height));
 		}
 		void btnMainChangeStates_Click(object sender, EventArgs e)
 		{
-			ContextMenuStrip cms = ShowMainChangeStatesMenuStrip();
+			ContextMenuStrip cms = showMainChangeStatesMenuStrip();
 			Button btn = (sender as Button);
 			cms.Show(btn, new Point(0, btn.Height));
 		}
 		void btnMainPrint_Click(object sender, EventArgs e)
 		{
-			ContextMenuStrip cms = ShowMainPrintMenuStrip();
+			ContextMenuStrip cms = showMainPrintMenuStrip();
 			Button btn = (sender as Button);
 			cms.Show(btn, new Point(0, btn.Height));
+		}
+		void dataGridView_CellContextMenuNeeded(object sender, DataGridViewCellContextMenuStripNeededEventArgs e)
+		{
+			if (e.RowIndex != -1 && e.ColumnIndex != -1)
+			{
+				if(!(sender as DataGridViewWithFilter).Rows[e.RowIndex].Selected)
+				{
+					(sender as DataGridViewWithFilter).ClearSelection();
+					(sender as DataGridViewWithFilter).Rows[e.RowIndex].Selected = true;
+				}
+				showDataBaseMenuStrip().Show(Cursor.Position);
+			}
 		}
 	}
 }

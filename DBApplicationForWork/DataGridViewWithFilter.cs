@@ -197,7 +197,7 @@ namespace DBApplicationForWork
 			popup.Items.Add(host3);
 			popup.Items.Add(host4);
 
-			popup.Show(this, e.ButtonRectangle.X, e.ButtonRectangle.Bottom);
+			popup.Show(this, e.ButtonRectangle.X - GetWidthColumn(e.ColumnIndex), e.ButtonRectangle.Bottom);
 			host1.Focus();
 		}
 
