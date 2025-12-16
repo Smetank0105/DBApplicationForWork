@@ -29,21 +29,27 @@ namespace DBApplicationForWork
 		}
 		public int InsertOneFieldTable(string table, string name)
 		{
-			string query = $"INSERT INTO {table} ([name]) VALUES (@name);";
+			if(string.IsNullOrEmpty(name))
+				throw new ArgumentNullException("Value cannot be null or empty", nameof(name));
+			int result = 0;
+			string query = $"MERGE {table} WITH (HOLDLOCK) AS target USING (SELECT @name AS name) AS source ON target.name = source.name WHEN MATCHED THEN UPDATE SET target.name = target.name WHEN NOT MATCHED THEN INSERT (name) VALUE (source.name) OUTPUT INSERTED.id;";
 			try
 			{
 				OpenConnection();
 				using (SqlCommand cmd = new SqlCommand(query, _connection))
 				{
-					cmd.Parameters.AddWithValue("@name", name);
-					return cmd.ExecuteNonQuery();
+					cmd.Parameters.Add("@name", SqlDbType.NVarChar, 50).Value = name;
+					var id = cmd.ExecuteScalar();
+					if (id != null && id != DBNull.Value)
+						result = Convert.ToInt32(id);
+					else
+						throw new Exception("Failed to insert or find the value");
 				}
 			} finally {CloseConnection(); }
+			return result;
 		}
-		public int InsertCartridgeRecords(int order_number, int request_number, short department, List<short> cartridge, List<int> inventory_number)
+		public int InsertCartridgeRecords(int order_number, string recording_date, int request_number, short department, List<short> cartridge, List<int> inventory_number)
 		{
-			DateTime date = DateTime.Now;
-			string recording_date = date.ToString("yyyy-MM-dd");
 			List<string> temp = new List<string>();
 			for(int i = 0; i < cartridge.Count; i++)
 				temp.Add($"(@order_number, @recording_date, @request_number, @department, @cartridge{i}, @inventory_number{i}, 1)");
@@ -53,14 +59,14 @@ namespace DBApplicationForWork
 				OpenConnection();
 				using (SqlCommand cmd = new SqlCommand(query, _connection))
 				{
-					cmd.Parameters.AddWithValue("@order_number", order_number);
-					cmd.Parameters.AddWithValue("@recording_date", recording_date);
-					cmd.Parameters.AddWithValue("@request_number", request_number);
-					cmd.Parameters.AddWithValue("@department", department);
+					cmd.Parameters.Add("@order_number", SqlDbType.Int).Value = order_number;
+					cmd.Parameters.Add("@recording_date", SqlDbType.Date).Value = recording_date;
+					cmd.Parameters.Add("@request_number", SqlDbType.Int).Value = request_number;
+					cmd.Parameters.Add("@department", SqlDbType.SmallInt).Value = department;
 					for(int i = 0; i < cartridge.Count; i ++)
 					{
-						cmd.Parameters.AddWithValue($"@cartridge{i}", cartridge[i]);
-						cmd.Parameters.AddWithValue($"@inventory_number{i}", inventory_number[i]);
+						cmd.Parameters.Add($"@cartridge{i}", SqlDbType.SmallInt).Value = cartridge[i];
+						cmd.Parameters.Add($"@inventory_number{i}", SqlDbType.Int).Value = inventory_number[i];
 					}
 					return cmd.ExecuteNonQuery();
 				}
@@ -95,7 +101,7 @@ namespace DBApplicationForWork
 		public DataTable SelectCartridgeRecords()
 		{
 			DataTable table = new DataTable();
-			string query = "SELECT id, order_number, recording_date, request_number, department, cartridge, inventory_number, remark, company_date, company_act, complection_date, [state] FROM CartridgeRecords;";
+			string query = "SELECT id, order_number, recording_date, request_number, department, cartridge, inventory_number, remark, company_date, company_act, complection_date, date_of_issue, [state] FROM CartridgeRecords;";
 			try
 			{
 				OpenConnection();

@@ -22,8 +22,8 @@ namespace DBApplicationForWork
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
 		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
-		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "списание"};
-		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.White};
+		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "списание"};
+		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.White};
 		string[] field_names = new string[] 
 		{
 			"ID",
@@ -37,6 +37,7 @@ namespace DBApplicationForWork
 			"дата передачи в фирму",
 			"номер акта фирмы",
 			"дата готовности",
+			"дата выдачи",
 			"статус"
 		};
 		const string font_name = "Arial";
@@ -61,7 +62,7 @@ namespace DBApplicationForWork
 //Create TabControl "tcPanel" with TabPages "tpMain" and "tpView"
 			TabControl tcPanel = new TabControl();
 			tcPanel.Dock = DockStyle.Top;
-			tcPanel.Height = 105;
+			tcPanel.Height = 120;
 			tcPanel.SizeMode = TabSizeMode.Fixed;
 			tcPanel.ItemSize = new Size(300, 20);
 			
@@ -78,7 +79,7 @@ namespace DBApplicationForWork
 			flpMain.AutoScroll = true;
 			flpMain.WrapContents = false;
 			flpMain.FlowDirection = FlowDirection.LeftToRight;
-			flpMain.Padding = new Padding(15);
+			flpMain.Padding = new Padding(20);
 			tpPanelMain.Controls.Add(flpMain);
 
 			TableLayoutPanel tlpView = new TableLayoutPanel();
@@ -87,11 +88,12 @@ namespace DBApplicationForWork
 			tlpView.Padding = new Padding(10);
 			tlpView.RowCount = 2;
 			tlpView.ColumnCount = field_names.Length - 1;
+			tlpView.AutoSize = true;
 			tpPanelView.Controls.Add(tlpView);
 
 //Create TabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
 			TabControl tcDataBase = new TabControl();
-			tcDataBase.Bounds = new Rectangle(0, 100, 985, 560);
+			tcDataBase.Bounds = new Rectangle(0, 120, 985, 540);
 			tcDataBase.Anchor = (AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right) | AnchorStyles.Bottom);
 			tcDataBase.SizeMode = TabSizeMode.Fixed;
 			tcDataBase.ItemSize = new Size (200, 30);
@@ -113,13 +115,13 @@ namespace DBApplicationForWork
 			addDataGridViewWithFilters(tcDataBase);
 
 //Create TextBox and CheckBox for "tcPnale->tpView"
+			addViewGroupBoxForDataGridSize(tlpView);
 			addViewCheckBoxes(tlpView);
-			addViewTextBoxes(tlpView);
 		}
 		void addMainButtons(FlowLayoutPanel flp)
 		{
 			int btnWidth = 150;
-			int btnHeight = 40;
+			int btnHeight = 50;
 
 			Button[] buttonsMain = new Button[]
 			{
@@ -173,34 +175,30 @@ namespace DBApplicationForWork
 				if (dGrids[i].Columns.Count > 0)dGrids[i].Columns[0].Visible = false;
 			}
 		}
-		void addViewTextBoxes(TableLayoutPanel tlp)
+		void addViewGroupBoxForDataGridSize(TableLayoutPanel tlp)
 		{
-			int tbWidth = 160;
-			int tbHeight = 20;
-
-			TextBox[] tbViews = new TextBox[]
-			{
-				new TextBox {Name = "tbView_1"},
-				new TextBox {Name = "tbView_2"},
-				new TextBox {Name = "tbView_3"},
-				new TextBox {Name = "tbView_4"},
-				new TextBox {Name = "tbView_5"},
-				new TextBox {Name = "tbView_6"},
-				new TextBox {Name = "tbView_7"},
-				new TextBox {Name = "tbView_8"},
-				new TextBox {Name = "tbView_9"},
-				new TextBox {Name = "tbView_10"},
-				new TextBox {Name = "tbView_11"},
-			};
-			for (int i = 0; i < tbViews.Length; i++)
-			{
-				tbViews[i].Size = new Size(tbWidth, tbHeight);
-				tlp.Controls.Add(tbViews[i]);
-			}
+			GroupBox gb = new GroupBox();
+			gb.Text = "Ширина столбцов";
+			gb.Size = new Size(320, 40);
+			FlowLayoutPanel flp = new FlowLayoutPanel();
+			flp.Dock = DockStyle.Fill;
+			flp.FlowDirection = FlowDirection.LeftToRight;
+			RadioButton rb1 = new RadioButton();
+			rb1.Size = new Size(150, 20);
+			rb1.Text = "Заполнение";
+			RadioButton rb2 = new RadioButton();
+			rb2.Size = new Size(150, 20);
+			rb2.Text = "По ячейкам";
+			gb.Controls.Add(flp);
+			flp.Controls.Add(rb1);
+			flp.Controls.Add(rb2);
+			tlp.Controls.Add(gb, 0, 1);
+			tlp.SetColumnSpan(gb, 2);
+			rb1.Checked = true;
 		}
 		void addViewCheckBoxes(TableLayoutPanel tlp)
 		{
-			int cbWidth = 160;
+			int cbWidth = 150;
 			int cbHeight = 20;
 
 			CheckBox[] cbViews = new CheckBox[]
@@ -215,13 +213,15 @@ namespace DBApplicationForWork
 				new CheckBox {Text = field_names[8], Name = "cbView_8"},
 				new CheckBox {Text = field_names[9], Name = "cbView_9"},
 				new CheckBox {Text = field_names[10], Name = "cbView_10"},
-				new CheckBox {Text = field_names[11], Name = "cbView_11"}
+				new CheckBox {Text = field_names[11], Name = "cbView_11"},
+				new CheckBox {Text = field_names[12], Name = "cbView_12"},
 			};
 			for (int i = 0;  i < cbViews.Length; i++)
 			{
 				cbViews[i].Size = new Size(cbWidth, cbHeight);
+				cbViews[i].TextAlign = ContentAlignment.TopLeft;
 				cbViews[i].CheckState = CheckState.Checked;
-				tlp.Controls.Add(cbViews[i]);
+				tlp.Controls.Add(cbViews[i], i, 0);
 			}
 		}
 
@@ -234,7 +234,7 @@ namespace DBApplicationForWork
 			cms.Font = new Font(font_name, font_size);
 			cms.ShowImageMargin = false;
 			cms.ShowCheckMargin = false;
-			for (int i = 1; i < 11; i++)
+			for (int i = 1; i < 12; i++)
 			{
 				cms.Items.Add($"Редактировать поле \"{field_names[i]}\"");
 			}
@@ -279,7 +279,7 @@ namespace DBApplicationForWork
 			cms.ShowImageMargin = false;
 			cms.ShowCheckMargin = false;
 			ToolStripMenuItem editMenu = new ToolStripMenuItem(panel_btn_names[1]);
-			for(int i = 1; i < field_names.Length; i++)
+			for(int i = 1; i < field_names.Length - 1; i++)
 				editMenu.DropDownItems.Add(field_names[i]);
 			cms.Items.Add(editMenu);
 			ToolStripMenuItem stateMenu = new ToolStripMenuItem(panel_btn_names[2]);
