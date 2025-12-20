@@ -237,12 +237,14 @@ namespace DBApplicationForWork
 			cms.Font = new Font(font_name, font_size);
 			cms.ShowImageMargin = false;
 			cms.ShowCheckMargin = false;
-			for (int i = 1; i < 12; i++)
+			for (int i = 1; i < field_names.Length - 1; i++)
 			{
-				cms.Items.Add($"Редактировать поле \"{field_names[i]}\"");
-			}
-			foreach (ToolStripItem item in cms.Items)
+				ToolStripMenuItem item = new ToolStripMenuItem($"Редактировать поле \"{field_names[i]}\"");
+				item.Name = $"tsmiMainEF_{i}";
 				item.Padding = new Padding(0, 2, 0, 2);
+				item.Click += new EventHandler(tsmiEditFields_Click);
+				cms.Items.Add(item);
+			}
 			return cms;
 		}
 		ContextMenuStrip showMainChangeStatesMenuStrip()
@@ -255,8 +257,10 @@ namespace DBApplicationForWork
 			for(int i = 1; i < state_names.Length;  i++)
 			{
 				ToolStripMenuItem item = new ToolStripMenuItem(state_names[i]);
+				item.Name = $"tsmiMainCS_{i}";
 				item.BackColor = state_colors[i];
 				item.Padding = new Padding(0, 2, 0, 2);
+				item.Click += new EventHandler(tsmiChangeStates_Click);
 				cms.Items.Add(item);
 			}
 			return cms;
@@ -268,10 +272,14 @@ namespace DBApplicationForWork
 			cms.Font = new Font(font_name, font_size);
 			cms.ShowImageMargin = false;
 			cms.ShowCheckMargin = false;
-			cms.Items.Add("Распечатать наряд");
-			cms.Items.Add("Распечатать акт фирмы");
-			foreach (ToolStripItem item in cms.Items)
-				item.Padding = new Padding(0, 2, 0, 2);
+			ToolStripMenuItem tsmiMainP1 = new ToolStripMenuItem("Распечатать наряд");
+			tsmiMainP1.Name = "tsmiMainP_1";
+			tsmiMainP1.Padding = new Padding(0, 2, 0, 2);
+			cms.Items.Add(tsmiMainP1);
+			ToolStripMenuItem tsmiMainP2 = new ToolStripMenuItem("Распечатать акт фирмы");
+			tsmiMainP2.Name = "tsmiMainP_2";
+			tsmiMainP2.Padding = new Padding(0, 2, 0, 2);
+			cms.Items.Add(tsmiMainP2);
 			return cms;
 		}
 		ContextMenuStrip showDataBaseMenuStrip()
@@ -283,11 +291,23 @@ namespace DBApplicationForWork
 			cms.ShowCheckMargin = false;
 			ToolStripMenuItem editMenu = new ToolStripMenuItem(panel_btn_names[1]);
 			for(int i = 1; i < field_names.Length - 1; i++)
-				editMenu.DropDownItems.Add(field_names[i]);
-			cms.Items.Add(editMenu);
+			{
+				ToolStripMenuItem item = new ToolStripMenuItem(field_names[i]);
+				item.Name = $"tsmiEditMenu_{i}";
+				item.Padding = new Padding(0, 2, 0, 2);
+				item.Click += new EventHandler(tsmiEditFields_Click);
+				editMenu.DropDownItems.Add(item);
+			}
 			ToolStripMenuItem stateMenu = new ToolStripMenuItem(panel_btn_names[2]);
 			for(int i = 1; i < state_names.Length; i++)
-				stateMenu.DropDownItems.Add(state_names[i]);
+			{
+				ToolStripMenuItem item = new ToolStripMenuItem(state_names[i]);
+				item.Name = $"tsmiStateMenu_{i}";
+				item.Padding = new Padding(0, 2, 0, 2);
+				item.Click += new EventHandler(tsmiEditFields_Click);
+				stateMenu.DropDownItems.Add(item);
+			}
+			cms.Items.Add(editMenu);
 			cms.Items.Add(stateMenu);
 			ToolStripMenuItem refreshMenu = new ToolStripMenuItem(panel_btn_names[4]);
 			cms.Items.Add(refreshMenu);
@@ -303,7 +323,7 @@ namespace DBApplicationForWork
 			InsertRecordsForm form = new InsertRecordsForm();
 			if (form.ShowDialog() == DialogResult.OK)
 			{
-				DataGridView dgv = this.Controls.Find("dgCartridges", true).FirstOrDefault() as DataGridView;
+				DataGridViewWithFilter dgv = this.Controls.Find("dgCartridges", true).FirstOrDefault() as DataGridViewWithFilter;
 				dgv.DataSource = connector.SelectCartridgeRecords();
 			}
 
@@ -336,6 +356,32 @@ namespace DBApplicationForWork
 					(sender as DataGridViewWithFilter).Rows[e.RowIndex].Selected = true;
 				}
 				showDataBaseMenuStrip().Show(Cursor.Position);
+			}
+		}
+		void tsmiEditFields_Click(object sender, EventArgs e)
+		{
+			string name = (sender as ToolStripMenuItem).Name;
+			if(!string.IsNullOrEmpty(name))
+			{
+				List<int> ids = new List<int>();
+				int index = Convert.ToInt32(name.Split('_').Last());
+				DataGridViewWithFilter dgv = this.Controls.Find("dgCartridges", true).FirstOrDefault() as DataGridViewWithFilter;
+				foreach (DataGridViewRow row in dgv.SelectedRows)
+					ids.Add(Convert.ToInt32(row.Cells[0].Value));
+				string value = dgv.SelectedRows[0].Cells[index].Value.ToString();
+
+				UpdateRecordsForm form = new UpdateRecordsForm(index, ids, value);
+				if (form.ShowDialog() == DialogResult.OK)
+					dgv.DataSource = connector.SelectCartridgeRecords();
+			}
+		}
+		void tsmiChangeStates_Click(object sender, EventArgs e)
+		{
+			string name = (sender as ToolStripMenuItem).Name;
+			if (!string.IsNullOrEmpty(name))
+			{
+				int index = Convert.ToInt32(name.Split('_').Last());
+				MessageBox.Show($"статус номер {index}");
 			}
 		}
 	}

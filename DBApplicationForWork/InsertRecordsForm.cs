@@ -14,8 +14,9 @@ namespace DBApplicationForWork
 	{
 		Connector connector;
 		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-		public List<short> Cartridges { get; set; }
-		public List<int> Inventorys { get; set; }
+
+		private List<short> cartridges;
+		private List<int> inventorys;
 		public InsertRecordsForm()
 		{
 			InitializeComponent();
@@ -25,8 +26,8 @@ namespace DBApplicationForWork
 		private void MainForm_Load(object sender, EventArgs e)
 		{
 			connector = new Connector(connectionString);
-			Cartridges = new List<short>();
-			Inventorys = new List<int>();
+			cartridges = new List<short>();
+			inventorys = new List<int>();
 			initComponents();
 		}
 		void initComponents()
@@ -82,6 +83,7 @@ namespace DBApplicationForWork
 			txtOrderNumber.Name = "txtOrderNumber";
 			txtOrderNumber.Dock = DockStyle.Fill;
 			txtOrderNumber.Text = (connector.GetLastOrderNumber() + 1).ToString();
+			txtOrderNumber.KeyPress += new KeyPressEventHandler(textBoxOnlyDigit_KeyPress);
 			tlpBaseInfo.Controls.Add(txtOrderNumber, 1, 0);
 
 			//Create field "recording_date"
@@ -93,7 +95,6 @@ namespace DBApplicationForWork
 			DateTimePicker dtpRecordingDate = new DateTimePicker();
 			dtpRecordingDate.Name = "dtpRecordingDate";
 			dtpRecordingDate.Dock = DockStyle.Fill;
-			dtpRecordingDate.Size = new Size(lblOrderNumber.Width, lblOrderNumber.Height);
 			dtpRecordingDate.CustomFormat = "yyyy-MM-dd";
 			dtpRecordingDate.Format = DateTimePickerFormat.Custom;
 			tlpBaseInfo.Controls.Add(dtpRecordingDate, 1, 1);
@@ -232,7 +233,7 @@ namespace DBApplicationForWork
 				{
 					if(cbCart.SelectedIndex != -1)
 					{
-						Cartridges.Add(Convert.ToInt16(cbCart.SelectedValue));
+						cartridges.Add(Convert.ToInt16(cbCart.SelectedValue));
 						newRow.Cells[0].Value = cbCart.Text;
 					}
 					else
@@ -240,7 +241,7 @@ namespace DBApplicationForWork
 						try
 						{
 							int id = connector.InsertOneFieldTable("Cartridges", cbCart.Text.Trim());
-							Cartridges.Add((short)id);
+							cartridges.Add((short)id);
 							newRow.Cells[0].Value = cbCart.Text.Trim();
 							cbCart.DataSource = connector.SelectSmallTable("Cartridges");
 							cbCart.DisplayMember = "name";
@@ -251,7 +252,7 @@ namespace DBApplicationForWork
 
 					if (cbInv.SelectedIndex != -1)
 					{
-						Inventorys.Add(Convert.ToInt32(cbInv.SelectedValue));
+						inventorys.Add(Convert.ToInt32(cbInv.SelectedValue));
 						newRow.Cells[1].Value = cbInv.Text;
 					}
 					else
@@ -259,7 +260,7 @@ namespace DBApplicationForWork
 						try
 						{
 							int id = connector.InsertOneFieldTable("CartridgeInventorys", cbInv.Text.Trim());
-							Inventorys.Add(id);
+							inventorys.Add(id);
 							newRow.Cells[1].Value = cbInv.Text.Trim();
 							cbInv.DataSource = connector.SelectSmallTable("CartridgeInventorys");
 							cbInv.DisplayMember = "name";
@@ -278,8 +279,8 @@ namespace DBApplicationForWork
 
 			if (dgv != null)
 			{
-				Cartridges.Clear();
-				Inventorys.Clear();
+				cartridges.Clear();
+				inventorys.Clear();
 				dgv.Rows.Clear();
 			}
 		}
@@ -293,7 +294,7 @@ namespace DBApplicationForWork
 			int request_number = 0;
 			short department = 0;
 
-			if (txtOrederNUmber != null && dtpRecordingDate != null && cbbRequestNumber != null && cbbDepartment != null && Cartridges.Count > 0)
+			if (txtOrederNUmber != null && dtpRecordingDate != null && cbbRequestNumber != null && cbbDepartment != null && cartridges.Count > 0)
 			{
 				if (!string.IsNullOrWhiteSpace(cbbRequestNumber.Text) && !string.IsNullOrWhiteSpace(cbbDepartment.Text))
 				{
@@ -328,14 +329,18 @@ namespace DBApplicationForWork
 									dtpRecordingDate.Value.ToString("yyyy-MM-dd"),
 									request_number,
 									department,
-									Cartridges,
-									Inventorys
+									cartridges,
+									inventorys
 									);
 			if (result == -1)
 				MessageBox.Show("InsertCartridgeRecords failed");
-			else if (result != Cartridges.Count)
+			else if (result != cartridges.Count)
 				MessageBox.Show("Error. Not all rows are inserted");
 			}
+		}
+		void textBoxOnlyDigit_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			if(!Char.IsDigit(e.KeyChar))e.Handled = true;
 		}
 	}
 }

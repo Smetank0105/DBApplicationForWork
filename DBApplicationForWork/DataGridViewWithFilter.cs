@@ -32,7 +32,7 @@ namespace DBApplicationForWork
 			try
 			{
 				Padding dropDownPadding = new Padding(0, 0, 20, 0);
-				this.Style.Padding = Padding.Add(this.InheritedStyle.Padding, dropDownPadding);
+				//this.Style.Padding = Padding.Add(this.InheritedStyle.Padding, dropDownPadding);
 			}
 			catch { }
 			base.OnDataGridViewChanged();

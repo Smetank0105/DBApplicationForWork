@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.SqlClient;
-using System.Data;
 
 namespace DBApplicationForWork
 {
@@ -74,13 +75,46 @@ namespace DBApplicationForWork
 		}
 		public int UpdateCartridgeRecords(string field, string value, List<int> id)
 		{
+			string[] field_names = new string[] { "", "order_number", "recording_date", "request_number", "department", "cartridge", "inventory_number", "remark", "company_date", "company_act", "complection_date", "date_of_issue", "[state]" };
 			string query = $"UPDATE CartridgeRecords SET {field} = @value WHERE id IN ({string.Join(", ", id)});";
 			try
 			{
 				OpenConnection();
 				using (SqlCommand cmd = new SqlCommand(query, _connection))
 				{
-					cmd.Parameters.AddWithValue("@value", value);
+					switch(Array.IndexOf(field_names, field))
+					{
+						case 7:
+							cmd.Parameters.Add("@value", SqlDbType.NVarChar, 50).Value = value;
+							break;
+						case 2:
+							cmd.Parameters.Add("@value", SqlDbType.Date).Value = value;
+							break;
+						case 8:
+						case 10:
+						case 11:
+							if (!string.IsNullOrWhiteSpace(value)) cmd.Parameters.Add("@value", SqlDbType.Date).Value = value;
+							else cmd.Parameters.Add("@value", SqlDbType.Date).Value = DBNull.Value;
+							break;
+						case 1:
+						case 3:
+						case 6:
+							cmd.Parameters.Add("@value", SqlDbType.Int).Value = Convert.ToInt32(value);
+							break;
+						case 4:
+						case 5:
+							cmd.Parameters.Add("@value", SqlDbType.SmallInt).Value = Convert.ToInt16(value);
+							break;
+						case 9:
+							if (!string.IsNullOrWhiteSpace(value)) cmd.Parameters.Add("@value", SqlDbType.SmallInt).Value = Convert.ToInt16(value);
+							else cmd.Parameters.Add("@value", SqlDbType.SmallInt).Value = DBNull.Value;
+							break;
+						case 12:
+							cmd.Parameters.Add("@value", SqlDbType.TinyInt).Value = Convert.ToByte(value);
+							break;
+						default:
+							return -1;
+					}
 					return cmd.ExecuteNonQuery();
 				}
 			} finally {CloseConnection(); }
