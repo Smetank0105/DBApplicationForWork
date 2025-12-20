@@ -49,7 +49,7 @@ namespace DBApplicationForWork
 			this.Load += new System.EventHandler(this.MainForm_Load);
 		}
 
-		private void MainForm_Load(object sender, EventArgs e)
+		void MainForm_Load(object sender, EventArgs e)
 		{
 			connector = new Connector(connectionString);
 			initComponents();
@@ -61,6 +61,7 @@ namespace DBApplicationForWork
 
 //Create TabControl "tcPanel" with TabPages "tpMain" and "tpView"
 			TabControl tcPanel = new TabControl();
+			tcPanel.Name = "tcPanel";
 			tcPanel.Dock = DockStyle.Top;
 			tcPanel.Height = 120;
 			tcPanel.SizeMode = TabSizeMode.Fixed;
@@ -93,6 +94,7 @@ namespace DBApplicationForWork
 
 //Create TabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
 			TabControl tcDataBase = new TabControl();
+			tcDataBase.Name = "tcDataBase";
 			tcDataBase.Bounds = new Rectangle(0, 120, 985, 540);
 			tcDataBase.Anchor = (AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right) | AnchorStyles.Bottom);
 			tcDataBase.SizeMode = TabSizeMode.Fixed;
@@ -144,6 +146,7 @@ namespace DBApplicationForWork
 				buttonsMain[i].Size = new Size(btnWidth, btnHeight);
 				flp.Controls.Add(buttonsMain[i]);
 			}
+			buttonsMain[0].Click += new EventHandler(btnMainNewOrder_Click);
 			buttonsMain[1].Click += new EventHandler(btnMainEditFileds_Click);
 			buttonsMain[2].Click += new EventHandler(btnMainChangeStates_Click);
 			buttonsMain[3].Click += new EventHandler(btnMainPrint_Click);
@@ -295,6 +298,16 @@ namespace DBApplicationForWork
 
 //Events
 
+		void btnMainNewOrder_Click(object sender, EventArgs e)
+		{
+			InsertRecordsForm form = new InsertRecordsForm();
+			if (form.ShowDialog() == DialogResult.OK)
+			{
+				DataGridView dgv = this.Controls.Find("dgCartridges", true).FirstOrDefault() as DataGridView;
+				dgv.DataSource = connector.SelectCartridgeRecords();
+			}
+
+		}
 		void btnMainEditFileds_Click(object sender, EventArgs e)
 		{
 			ContextMenuStrip cms = showMainEditFieldsMenuStrip();

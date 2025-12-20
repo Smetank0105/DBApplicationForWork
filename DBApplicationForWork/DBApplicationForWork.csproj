@@ -48,6 +48,12 @@
   <ItemGroup>
     <Compile Include="Connector.cs" />
     <Compile Include="DataGridViewWithFilter.cs" />
+    <Compile Include="InsertRecordsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InsertRecordsForm.Designer.cs">
+      <DependentUpon>InsertRecordsForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>

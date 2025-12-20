@@ -32,7 +32,7 @@ namespace DBApplicationForWork
 			if(string.IsNullOrEmpty(name))
 				throw new ArgumentNullException("Value cannot be null or empty", nameof(name));
 			int result = 0;
-			string query = $"MERGE {table} WITH (HOLDLOCK) AS target USING (SELECT @name AS name) AS source ON target.name = source.name WHEN MATCHED THEN UPDATE SET target.name = target.name WHEN NOT MATCHED THEN INSERT (name) VALUE (source.name) OUTPUT INSERTED.id;";
+			string query = $"MERGE {table} WITH (HOLDLOCK) AS target USING (SELECT @name AS name) AS source ON target.name = source.name WHEN MATCHED THEN UPDATE SET target.name = target.name WHEN NOT MATCHED THEN INSERT (name) VALUES (source.name) OUTPUT INSERTED.id;";
 			try
 			{
 				OpenConnection();
@@ -101,7 +101,7 @@ namespace DBApplicationForWork
 		public DataTable SelectCartridgeRecords()
 		{
 			DataTable table = new DataTable();
-			string query = "SELECT id, order_number, recording_date, request_number, department, cartridge, inventory_number, remark, company_date, company_act, complection_date, date_of_issue, [state] FROM CartridgeRecords;";
+			string query = "SELECT CartridgeRecords.id, order_number AS N'Номер наряда', recording_date AS N'Дата поступления', RequestNumbers.name AS N'Номер заявки', Departments.name AS N'Отдел', Cartridges.name AS N'Наименование', CartridgeInventorys.name AS N'Инвентарный', remark AS N'Пометки', company_date AS N'Дата передачи в фирму', company_act AS N'Номер акта фирмы', complection_date AS N'Дата готовности', date_of_issue AS N'Дата выдачи', States.name AS N'Статус' FROM CartridgeRecords, Cartridges, Departments, CartridgeInventorys, RequestNumbers, States WHERE Cartridges.id=cartridge AND Departments.id=department AND CartridgeInventorys.id=inventory_number AND RequestNumbers.id=request_number AND States.id=[state];";
 			try
 			{
 				OpenConnection();
@@ -112,7 +112,7 @@ namespace DBApplicationForWork
 						adapter.Fill(table);
 					}
 				}
-			} finally { CloseConnection() ; }
+			} finally { CloseConnection(); }
 			return table;
 		}
 		public DataTable SelectCartridgeInventorys(short department, short cartridge)
@@ -133,6 +133,25 @@ namespace DBApplicationForWork
 				}
 			} finally { CloseConnection(); }
 			return table;
+		}
+		public DataTable SelectSmallTable(string table)
+		{
+			DataTable dt = new DataTable();
+			dt.Columns.Add("id",  typeof(int));
+			dt.Columns.Add("name",  typeof(string));
+			string query = $"SELECT id, [name] FROM {table};";
+			try
+			{
+				OpenConnection();
+				using (SqlCommand cmd = new SqlCommand(query, _connection))
+				{
+					using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+					{
+						adapter.Fill(dt);
+					}
+				}
+			} finally { CloseConnection(); }
+			return dt;
 		}
 		public void Dispose()
 		{
