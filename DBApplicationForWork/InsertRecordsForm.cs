@@ -81,6 +81,7 @@ namespace DBApplicationForWork
 			TextBox txtOrderNumber = new TextBox();
 			txtOrderNumber.Name = "txtOrderNumber";
 			txtOrderNumber.Dock = DockStyle.Fill;
+			txtOrderNumber.Text = (connector.GetLastOrderNumber() + 1).ToString();
 			tlpBaseInfo.Controls.Add(txtOrderNumber, 1, 0);
 
 			//Create field "recording_date"
@@ -321,8 +322,6 @@ namespace DBApplicationForWork
 						catch (Exception ex) { MessageBox.Show(ex.Message); }
 					}
 				}
-			}
-
 			int result = connector.InsertCartridgeRecords
 									(
 									Convert.ToInt32(txtOrederNUmber.Text),
@@ -336,6 +335,7 @@ namespace DBApplicationForWork
 				MessageBox.Show("InsertCartridgeRecords failed");
 			else if (result != Cartridges.Count)
 				MessageBox.Show("Error. Not all rows are inserted");
+			}
 		}
 	}
 }

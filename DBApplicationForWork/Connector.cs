@@ -153,6 +153,22 @@ namespace DBApplicationForWork
 			} finally { CloseConnection(); }
 			return dt;
 		}
+		public int GetLastOrderNumber()
+		{
+			int number = 0;
+			string query = "SELECT TOP 1 order_number FROM CartridgeRecords ORDER BY id DESC;";
+			try
+			{
+				OpenConnection();
+				using (SqlCommand cmd = new SqlCommand(query, _connection))
+				{
+					var result = cmd.ExecuteScalar();
+					if (result != null && result != DBNull.Value)
+						number = Convert.ToInt32(result);
+				}
+			} finally { CloseConnection(); }
+			return number;
+		}
 		public void Dispose()
 		{
 			_connection?.Dispose();
