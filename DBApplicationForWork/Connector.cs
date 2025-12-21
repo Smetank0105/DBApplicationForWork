@@ -166,10 +166,11 @@ namespace DBApplicationForWork
 			} finally { CloseConnection(); }
 			return table;
 		}
-		public DataTable SelectInventorys(short department)
+		public DataTable SelectInventorys(int tabpage_index, short department)
 		{
+			string[] field_names = new string[] { "CartridgeInventorys", "CartridgeInventorys", "ComputerInventorys" };
 			DataTable table = new DataTable();
-			string query = "SELECT CartridgeInventorys.id, CartridgeInventorys.[name] FROM CartridgeInventorys, CartridgeRecords WHERE CartridgeInventorys.id = CartridgeRecords.inventory_number AND department = @department";
+			string query = $"SELECT {field_names[tabpage_index]}.id, {field_names[tabpage_index]}.[name] FROM {field_names[tabpage_index]}, {table_names[tabpage_index]} WHERE {field_names[tabpage_index]}.id = {field_names[tabpage_index]}.inventory_number AND department = @department";
 			try
 			{
 				OpenConnection();
