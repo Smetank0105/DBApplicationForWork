@@ -123,6 +123,7 @@ namespace DBApplicationForWork
 
 		private int columnIndex {  get; set; }
 
+		protected override bool DoubleBuffered { get => true; }
 		protected override void OnColumnAdded(DataGridViewColumnEventArgs e)
 		{
 			DataGridFilterHeader header = new DataGridFilterHeader();

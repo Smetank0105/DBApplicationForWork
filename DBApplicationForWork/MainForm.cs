@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace DBApplicationForWork
 {
@@ -21,6 +22,7 @@ namespace DBApplicationForWork
 		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
+		string[] dataGrid_names = new string[] { "dgCartridges", "dgPrinters", "dgComputers" };
 		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
 		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "списание"};
 		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.White};
@@ -49,11 +51,7 @@ namespace DBApplicationForWork
 			this.Load += new System.EventHandler(this.MainForm_Load);
 		}
 
-		void MainForm_Load(object sender, EventArgs e)
-		{
-			connector = new Connector(connectionString);
-			initComponents();
-		}
+//Controls
 
 		void initComponents()
 		{
@@ -150,14 +148,16 @@ namespace DBApplicationForWork
 			buttonsMain[1].Click += new EventHandler(btnMainEditFileds_Click);
 			buttonsMain[2].Click += new EventHandler(btnMainChangeStates_Click);
 			buttonsMain[3].Click += new EventHandler(btnMainPrint_Click);
+			buttonsMain[4].Click += new EventHandler(btnMainRefresh_Click);
+			buttonsMain[5].Click += new EventHandler(btnMainDelete_Click);
 		}
 		void addDataGridViewWithFilters(TabControl tc)
 		{
 			DataGridViewWithFilter[] dGrids = new DataGridViewWithFilter[]
 			{
-				new DataGridViewWithFilter {Name = "dgCartridges"},
-				new DataGridViewWithFilter {Name = "dgPrinters"},
-				new DataGridViewWithFilter {Name = "dgComputers"}
+				new DataGridViewWithFilter {Name = dataGrid_names[0]},
+				new DataGridViewWithFilter {Name = dataGrid_names[1]},
+				new DataGridViewWithFilter {Name = dataGrid_names[2]}
 			};
 			for (int i = 0; i < dGrids.Length; i++)
 			{
@@ -225,6 +225,26 @@ namespace DBApplicationForWork
 				cbViews[i].TextAlign = ContentAlignment.TopLeft;
 				cbViews[i].CheckState = CheckState.Checked;
 				tlp.Controls.Add(cbViews[i], i, 0);
+			}
+		}
+		void loadDataGridView()
+		{
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			if (tc != null)
+			{
+				DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+				switch(tc.SelectedIndex)
+				{
+					case 0:
+						dgv.DataSource = connector.SelectCartridgeRecords();
+						break;
+					case 1:
+						break;
+					case 2:
+						break;
+					default:
+						break;
+				}
 			}
 		}
 
@@ -304,7 +324,7 @@ namespace DBApplicationForWork
 				ToolStripMenuItem item = new ToolStripMenuItem(state_names[i]);
 				item.Name = $"tsmiStateMenu_{i}";
 				item.Padding = new Padding(0, 2, 0, 2);
-				item.Click += new EventHandler(tsmiEditFields_Click);
+				item.Click += new EventHandler(tsmiChangeStates_Click);
 				stateMenu.DropDownItems.Add(item);
 			}
 			cms.Items.Add(editMenu);
@@ -318,15 +338,16 @@ namespace DBApplicationForWork
 
 //Events
 
+		void MainForm_Load(object sender, EventArgs e)
+		{
+			connector = new Connector(connectionString);
+			initComponents();
+		}
 		void btnMainNewOrder_Click(object sender, EventArgs e)
 		{
 			InsertRecordsForm form = new InsertRecordsForm();
-			if (form.ShowDialog() == DialogResult.OK)
-			{
-				DataGridViewWithFilter dgv = this.Controls.Find("dgCartridges", true).FirstOrDefault() as DataGridViewWithFilter;
-				dgv.DataSource = connector.SelectCartridgeRecords();
-			}
-
+			if (form.ShowDialog() == DialogResult.OK) 
+				loadDataGridView();
 		}
 		void btnMainEditFileds_Click(object sender, EventArgs e)
 		{
@@ -345,6 +366,22 @@ namespace DBApplicationForWork
 			ContextMenuStrip cms = showMainPrintMenuStrip();
 			Button btn = (sender as Button);
 			cms.Show(btn, new Point(0, btn.Height));
+		}
+		void btnMainRefresh_Click(object sender, EventArgs e)
+		{
+			loadDataGridView();
+		}
+		void btnMainDelete_Click(object sender, EventArgs e)
+		{
+			List<int> ids = new List<int>();
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[0], true).FirstOrDefault() as DataGridViewWithFilter;
+			foreach (DataGridViewRow row in dgv.SelectedRows)
+				ids.Add(Convert.ToInt32(row.Cells[0].Value));
+			if (MessageBox.Show("Вы уверены, что хотите удалить эти записи?", "Внимание!", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+			{
+				connector.DeleteCartridgeRecords(ids);
+				loadDataGridView();
+			}
 		}
 		void dataGridView_CellContextMenuNeeded(object sender, DataGridViewCellContextMenuStripNeededEventArgs e)
 		{
@@ -365,14 +402,14 @@ namespace DBApplicationForWork
 			{
 				List<int> ids = new List<int>();
 				int index = Convert.ToInt32(name.Split('_').Last());
-				DataGridViewWithFilter dgv = this.Controls.Find("dgCartridges", true).FirstOrDefault() as DataGridViewWithFilter;
+				DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[0], true).FirstOrDefault() as DataGridViewWithFilter;
 				foreach (DataGridViewRow row in dgv.SelectedRows)
 					ids.Add(Convert.ToInt32(row.Cells[0].Value));
 				string value = dgv.SelectedRows[0].Cells[index].Value.ToString();
 
 				UpdateRecordsForm form = new UpdateRecordsForm(index, ids, value);
 				if (form.ShowDialog() == DialogResult.OK)
-					dgv.DataSource = connector.SelectCartridgeRecords();
+					loadDataGridView();
 			}
 		}
 		void tsmiChangeStates_Click(object sender, EventArgs e)
@@ -380,8 +417,13 @@ namespace DBApplicationForWork
 			string name = (sender as ToolStripMenuItem).Name;
 			if (!string.IsNullOrEmpty(name))
 			{
+				List<int> ids = new List<int>();
 				int index = Convert.ToInt32(name.Split('_').Last());
-				MessageBox.Show($"статус номер {index}");
+				DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[0], true).FirstOrDefault() as DataGridViewWithFilter;
+				foreach (DataGridViewRow row in dgv.SelectedRows)
+					ids.Add(Convert.ToInt32(row.Cells[0].Value));
+				connector.UpdateCartridgeRecords("[state]", $"{index}", ids);
+				loadDataGridView();
 			}
 		}
 	}
