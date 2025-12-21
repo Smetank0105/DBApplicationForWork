@@ -31,12 +31,12 @@ namespace DBApplicationForWork
 		{
 			"ID",
 			"номер наряда",
-			"дата записи",
+			"дата поступления",
 			"номер заявки",
 			"подразделение",
-			"название оборудования",
+			"наименование",
 			"инвенратный номер",
-			"замечания",
+			"заметки",
 			"дата передачи в фирму",
 			"номер акта фирмы",
 			"дата готовности",
@@ -99,6 +99,7 @@ namespace DBApplicationForWork
 			tcDataBase.SizeMode = TabSizeMode.Fixed;
 			tcDataBase.ItemSize = new Size (200, 30);
 			tcDataBase.Alignment = TabAlignment.Right;
+			tcDataBase.SelectedIndexChanged += new EventHandler(tcDataBase_SelectedIndexChanged);
 
 			TabPage tpCartridges = new TabPage(database_tp_names[0]);
 			TabPage tpPrinters = new TabPage(database_tp_names[1]);
@@ -483,6 +484,24 @@ namespace DBApplicationForWork
 				DataGridViewRow row = (sender as DataGridViewWithFilter).Rows[e.RowIndex];
 				int index = Array.IndexOf(state_names, (row.DataBoundItem as DataRowView)?[12]?.ToString());
 				row.DefaultCellStyle.BackColor = state_colors[index];
+			}
+		}
+		void tcDataBase_SelectedIndexChanged(object sender, EventArgs e)
+		{
+			TabControl tc = sender as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+			if(dgv != null && tc != null)
+			{
+				for (int i = 1; i < dgv.Columns.Count; i++)
+				{
+					CheckBox cb = this.Controls.Find($"cbView_{i}", true).FirstOrDefault() as CheckBox;
+					if (cb != null)
+						cb.Checked = dgv.Columns[i].Visible;
+				}
+				if (dgv.AutoSizeColumnsMode == DataGridViewAutoSizeColumnsMode.Fill)
+					(this.Controls.Find("rb_fill", true).FirstOrDefault() as RadioButton).Checked = true;
+				else
+					(this.Controls.Find("rb_cell", true).FirstOrDefault() as RadioButton).Checked = true;
 			}
 		}
 	}
