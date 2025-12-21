@@ -289,7 +289,7 @@ namespace DBApplicationForWork
 				if (ValueCell.IndexOf(textBox.Text, StringComparison.OrdinalIgnoreCase) >= 0)
 				{
 					int index = ChkList.FindIndex(item => item.valueString == ValueCell);
-					if (index == -1)
+					if (index == -1 && !string.IsNullOrWhiteSpace(ValueCell))
 						ChkList.Add(new FilterStatus { valueString = ValueCell, check = true });
 				}
 			}

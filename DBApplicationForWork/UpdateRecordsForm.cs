@@ -15,16 +15,22 @@ namespace DBApplicationForWork
 	{
 		Connector connector;
 		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-		string[] field_names = new string[] { "", "order_number", "recording_date", "request_number", "department", "cartridge", "inventory_number", "remark", "company_date", "company_act", "complection_date", "date_of_issue" };
 		string[] names = new string[] { "", "номер наряда", "дата записи", "номер заявки", "подразделение", "название оборудования", "инвенратный номер", "замечания", "дата передачи в фирму", "номер акта фирмы", "дата готовности", "дата выдачи" };
-		string[] tables_name = new string[] { "", "", "", "RequestNumbers", "Departments", "Cartridges", "CartridgeInventorys" };
-		private int Index { get; set; }
+		string[][] table_names =
+		{
+			new string[] { "", "", "", "RequestNumbers", "Departments", "Cartridges", "CartridgeInventorys" },
+			new string[] { "", "", "", "RequestNumbers", "Departments", "Printers", "CartridgeInventorys" },
+			new string[] { "", "", "", "RequestNumbers", "Departments", "Computers", "ComputerInventorys" }
+		};
+		private int TableIndex { get; set; }
+		private int FieldIndex { get; set; }
 		private List<int> Ids { get; set; }
 		private string Value { get; set; }
-		public UpdateRecordsForm(int index, List<int> ids, string current_value)
+		public UpdateRecordsForm(int table_index, int field_index, List<int> ids, string current_value)
 		{
 			InitializeComponent();
-			this.Index = index;
+			this.TableIndex = table_index;
+			this.FieldIndex = field_index;
 			this.Ids = ids;
 			this.Value = current_value;
 			this.Load += new EventHandler(this.UpdateRecordsForm_Load);
@@ -36,7 +42,7 @@ namespace DBApplicationForWork
 		}
 		void initComponents()
 		{
-			this.Text = $"\"{names[Index]}\"";
+			this.Text = $"\"{names[FieldIndex]}\"";
 			this.Size = new Size(300, 120);
 			this.FormBorderStyle = FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
@@ -72,7 +78,7 @@ namespace DBApplicationForWork
 			flp.Controls.Add(btnOk);
 
 			//Create edit fields control (TextBox, DateTimePicker or ComboBox)
-			switch (Index)
+			switch (FieldIndex)
 			{
 				case 1:
 				case 7:
@@ -82,7 +88,7 @@ namespace DBApplicationForWork
 					txt.Dock = DockStyle.Fill;
 					if(!string.IsNullOrEmpty(Value)) 
 						txt.Text = Value;
-					if (Index != 7)
+					if (FieldIndex != 7)
 						txt.KeyPress += new KeyPressEventHandler(txtOnlyDigit_KeyPress);
 					tlp.Controls.Add(txt, 0, 0);
 					tlp.SetColumnSpan(txt, 2);
@@ -100,7 +106,7 @@ namespace DBApplicationForWork
 						dtp.Value = DateTime.Parse(Value);
 					tlp.Controls.Add(dtp, 0, 0);
 					tlp.SetColumnSpan(dtp, 2);
-					if (Index != 2)
+					if (FieldIndex != 2)
 					{
 						Button btnClear = new Button();
 						btnClear.Name = "btnClear";
@@ -118,7 +124,7 @@ namespace DBApplicationForWork
 					ComboBox cbb = new ComboBox();
 					cbb.Name = "cbb";
 					cbb.Dock = DockStyle.Fill;
-					cbb.DataSource = connector.SelectSmallTable(tables_name[Index]);
+					cbb.DataSource = connector.SelectSmallTable(table_names[TableIndex][FieldIndex]);
 					cbb.DisplayMember = "name";
 					cbb.ValueMember = "id";
 					cbb.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -139,14 +145,14 @@ namespace DBApplicationForWork
 		void btnOk_Click(object sender, EventArgs e)
 		{
 			int result = 0;
-			switch (Index)
+			switch (FieldIndex)
 			{
 				case 1:
 				case 7:
 				case 9:
 					TextBox txt = this.Controls.Find("txt", true).FirstOrDefault() as TextBox;
-					if(txt != null && (!string.IsNullOrEmpty(txt.Text) || Index == 7 || Index == 9))
-						result = connector.UpdateCartridgeRecords(field_names[Index], txt.Text, Ids);
+					if(txt != null && (!string.IsNullOrEmpty(txt.Text) || FieldIndex == 7 || FieldIndex == 9))
+						result = connector.UpdateRecords(TableIndex, FieldIndex, txt.Text, Ids);
 					break;
 				case 2:
 				case 8:
@@ -154,7 +160,7 @@ namespace DBApplicationForWork
 				case 11:
 					DateTimePicker dtp = this.Controls.Find("dtp", true).FirstOrDefault() as DateTimePicker;
 					if(dtp != null)
-						result = connector.UpdateCartridgeRecords(field_names[Index], dtp.Text, Ids);
+						result = connector.UpdateRecords(TableIndex, FieldIndex, dtp.Text, Ids);
 					break;
 				case 3:
 				case 4:
@@ -172,11 +178,11 @@ namespace DBApplicationForWork
 						{
 							try
 							{
-								str = connector.InsertOneFieldTable(tables_name[Index], cbb.Text.Trim()).ToString();
+								str = connector.InsertOneFieldTable(table_names[TableIndex][FieldIndex], cbb.Text.Trim()).ToString();
 							}
 							catch (Exception ex) { MessageBox.Show(ex.Message); }
 						}
-						result = connector.UpdateCartridgeRecords(field_names[Index], str, Ids);
+						result = connector.UpdateRecords(TableIndex, FieldIndex, str, Ids);
 					}
 					break;
 				default:
@@ -189,7 +195,7 @@ namespace DBApplicationForWork
 		}
 		void btnClear_Click(object sender, EventArgs e)
 		{
-			int result = connector.UpdateCartridgeRecords(field_names[Index], "", Ids);
+			int result = connector.UpdateRecords(TableIndex, FieldIndex, "", Ids);
 			if (result == -1)
 				MessageBox.Show("UpdateCartridgeRecords failed");
 			else if (result != Ids.Count)

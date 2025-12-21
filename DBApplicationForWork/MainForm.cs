@@ -21,6 +21,7 @@ namespace DBApplicationForWork
 
 		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
+		string[] table_names = new string[] { "CartridgeRecords", "PrinterRecords", "ComputerRecords" };
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
 		string[] dataGrid_names = new string[] { "dgCartridges", "dgPrinters", "dgComputers" };
 		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
@@ -115,7 +116,7 @@ namespace DBApplicationForWork
 			addDataGridViewWithFilters(tcDataBase);
 
 //Create TextBox and CheckBox for "tcPnale->tpView"
-			addViewGroupBoxForDataGridSize(tlpView);
+			addViewGroupBoxForDataGridColumnWidth(tlpView);
 			addViewCheckBoxes(tlpView);
 		}
 		void addMainButtons(FlowLayoutPanel flp)
@@ -161,43 +162,26 @@ namespace DBApplicationForWork
 			};
 			for (int i = 0; i < dGrids.Length; i++)
 			{
+				tc.TabPages[i].Controls.Add(dGrids[i]);
 				dGrids[i].Dock = DockStyle.Fill;
 				dGrids[i].AllowUserToAddRows = false;
 				dGrids[i].AllowUserToDeleteRows = false;
+				dGrids[i].ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
+				dGrids[i].RowHeadersWidthSizeMode = DataGridViewRowHeadersWidthSizeMode.DisableResizing;
+				dGrids[i].AllowUserToResizeColumns = false;
+				dGrids[i].AllowUserToResizeRows = false;
 				dGrids[i].ReadOnly = true;
 				dGrids[i].SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 				dGrids[i].AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 				dGrids[i].CellContextMenuStripNeeded += new DataGridViewCellContextMenuStripNeededEventHandler(dataGridView_CellContextMenuNeeded);
-				tc.TabPages[i].Controls.Add(dGrids[i]);
-			}
-			dGrids[0].DataSource = connector.SelectCartridgeRecords();
-			for (int i = 0; i < dGrids.Length; i++)
-			{ 
+				dGrids[i].CellFormatting += new DataGridViewCellFormattingEventHandler(dataGridView_CellFormating);
+				dGrids[i].DataSource = connector.SelectRecords(table_names[i]);
 				for (int j = 0; j < dGrids[i].ColumnCount; j++)
 					dGrids[i].Columns[j].SortMode = DataGridViewColumnSortMode.NotSortable;
 				if (dGrids[i].Columns.Count > 0)dGrids[i].Columns[0].Visible = false;
+				if (dGrids[i].Rows.Count > 0)
+					dGrids[i].FirstDisplayedScrollingRowIndex = dGrids[i].Rows.Count - 1;
 			}
-		}
-		void addViewGroupBoxForDataGridSize(TableLayoutPanel tlp)
-		{
-			GroupBox gb = new GroupBox();
-			gb.Text = "Ширина столбцов";
-			gb.Size = new Size(320, 40);
-			FlowLayoutPanel flp = new FlowLayoutPanel();
-			flp.Dock = DockStyle.Fill;
-			flp.FlowDirection = FlowDirection.LeftToRight;
-			RadioButton rb1 = new RadioButton();
-			rb1.Size = new Size(150, 20);
-			rb1.Text = "Заполнение";
-			RadioButton rb2 = new RadioButton();
-			rb2.Size = new Size(150, 20);
-			rb2.Text = "По ячейкам";
-			gb.Controls.Add(flp);
-			flp.Controls.Add(rb1);
-			flp.Controls.Add(rb2);
-			tlp.Controls.Add(gb, 0, 1);
-			tlp.SetColumnSpan(gb, 2);
-			rb1.Checked = true;
 		}
 		void addViewCheckBoxes(TableLayoutPanel tlp)
 		{
@@ -224,27 +208,46 @@ namespace DBApplicationForWork
 				cbViews[i].Size = new Size(cbWidth, cbHeight);
 				cbViews[i].TextAlign = ContentAlignment.TopLeft;
 				cbViews[i].CheckState = CheckState.Checked;
+				cbViews[i].CheckedChanged += new EventHandler(viewCheckBoxs_CheckChanged);
 				tlp.Controls.Add(cbViews[i], i, 0);
 			}
+		}
+		void addViewGroupBoxForDataGridColumnWidth(TableLayoutPanel tlp)
+		{
+			GroupBox gb = new GroupBox();
+			gb.Text = "Ширина столбцов";
+			gb.Size = new Size(320, 50);
+			FlowLayoutPanel flp = new FlowLayoutPanel();
+			flp.Dock = DockStyle.Fill;
+			flp.FlowDirection = FlowDirection.LeftToRight;
+			RadioButton rb1 = new RadioButton();
+			rb1.Name = "rb_fill";
+			rb1.Size = new Size(150, 20);
+			rb1.Text = "Заполнение";
+			rb1.CheckedChanged += new EventHandler(viewRadioButton_CkeckChanged);
+			RadioButton rb2 = new RadioButton();
+			rb2.Name = "rb_cell";
+			rb2.Size = new Size(150, 20);
+			rb2.Text = "По ячейкам";
+			rb2.CheckedChanged += new EventHandler(viewRadioButton_CkeckChanged);
+			gb.Controls.Add(flp);
+			flp.Controls.Add(rb1);
+			flp.Controls.Add(rb2);
+			tlp.Controls.Add(gb, 0, 1);
+			tlp.SetColumnSpan(gb, 2);
+			rb1.Checked = true;
 		}
 		void loadDataGridView()
 		{
 			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
-			if (tc != null)
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (tc != null && dgv != null)
 			{
-				DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
-				switch(tc.SelectedIndex)
-				{
-					case 0:
-						dgv.DataSource = connector.SelectCartridgeRecords();
-						break;
-					case 1:
-						break;
-					case 2:
-						break;
-					default:
-						break;
-				}
+				dgv.DataSource = connector.SelectRecords(table_names[tc.SelectedIndex]);
+			}
+			if (dgv.Rows.Count > 0)
+			{
+				dgv.FirstDisplayedScrollingRowIndex = dgv.Rows.Count - 1;
 			}
 		}
 
@@ -345,9 +348,13 @@ namespace DBApplicationForWork
 		}
 		void btnMainNewOrder_Click(object sender, EventArgs e)
 		{
-			InsertRecordsForm form = new InsertRecordsForm();
-			if (form.ShowDialog() == DialogResult.OK) 
-				loadDataGridView();
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			if (tc != null)
+			{
+				InsertRecordsForm form = new InsertRecordsForm(tc.SelectedIndex);
+				if (form.ShowDialog() == DialogResult.OK)
+					loadDataGridView(); 
+			}
 		}
 		void btnMainEditFileds_Click(object sender, EventArgs e)
 		{
@@ -374,12 +381,13 @@ namespace DBApplicationForWork
 		void btnMainDelete_Click(object sender, EventArgs e)
 		{
 			List<int> ids = new List<int>();
-			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[0], true).FirstOrDefault() as DataGridViewWithFilter;
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			foreach (DataGridViewRow row in dgv.SelectedRows)
 				ids.Add(Convert.ToInt32(row.Cells[0].Value));
 			if (MessageBox.Show("Вы уверены, что хотите удалить эти записи?", "Внимание!", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
 			{
-				connector.DeleteCartridgeRecords(ids);
+				connector.DeleteCartridgeRecords(tc.SelectedIndex, ids);
 				loadDataGridView();
 			}
 		}
@@ -398,16 +406,16 @@ namespace DBApplicationForWork
 		void tsmiEditFields_Click(object sender, EventArgs e)
 		{
 			string name = (sender as ToolStripMenuItem).Name;
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			if(!string.IsNullOrEmpty(name))
 			{
 				List<int> ids = new List<int>();
 				int index = Convert.ToInt32(name.Split('_').Last());
-				DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[0], true).FirstOrDefault() as DataGridViewWithFilter;
 				foreach (DataGridViewRow row in dgv.SelectedRows)
 					ids.Add(Convert.ToInt32(row.Cells[0].Value));
 				string value = dgv.SelectedRows[0].Cells[index].Value.ToString();
-
-				UpdateRecordsForm form = new UpdateRecordsForm(index, ids, value);
+				UpdateRecordsForm form = new UpdateRecordsForm(tc.SelectedIndex, index, ids, value);
 				if (form.ShowDialog() == DialogResult.OK)
 					loadDataGridView();
 			}
@@ -415,15 +423,66 @@ namespace DBApplicationForWork
 		void tsmiChangeStates_Click(object sender, EventArgs e)
 		{
 			string name = (sender as ToolStripMenuItem).Name;
-			if (!string.IsNullOrEmpty(name))
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (!string.IsNullOrEmpty(name) && tc != null && dgv != null)
 			{
 				List<int> ids = new List<int>();
 				int index = Convert.ToInt32(name.Split('_').Last());
-				DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[0], true).FirstOrDefault() as DataGridViewWithFilter;
 				foreach (DataGridViewRow row in dgv.SelectedRows)
 					ids.Add(Convert.ToInt32(row.Cells[0].Value));
-				connector.UpdateCartridgeRecords("[state]", $"{index}", ids);
+				connector.UpdateRecords(tc.SelectedIndex, 12, $"{index}", ids);
+				switch (index)
+				{
+					//в фирме
+					case 3:
+						connector.UpdateRecords(tc.SelectedIndex, 8, (DateTime.Now).ToString("yyyy-MM-dd"), ids);
+						break;
+					//готов
+					//списание
+					case 4:
+					case 6:
+						connector.UpdateRecords(tc.SelectedIndex, 10, (DateTime.Now).ToString("yyyy-MM-dd"), ids);
+						break;
+					//выдан
+					case 5:
+						connector.UpdateRecords(tc.SelectedIndex, 11, (DateTime.Now).ToString("yyyy-MM-dd"), ids);
+						break;
+					default:
+						break;
+				};
 				loadDataGridView();
+			}
+		}
+		void viewCheckBoxs_CheckChanged(object sender, EventArgs e)
+		{
+			CheckBox cb = sender as CheckBox;
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+			int index = Convert.ToInt32(cb.Name.Split('_').Last());
+			if (cb != null && tc != null && dgv != null)
+			{
+				dgv.Columns[index].Visible = cb.Checked;
+			}
+		}
+		void viewRadioButton_CkeckChanged(object sender, EventArgs e)
+		{
+			RadioButton rb = sender as RadioButton;
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (rb != null && tc != null && dgv != null)
+			{
+				if(rb.Name == "rb_fill") dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
+				else if(rb.Name == "rb_cell") dgv.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader;
+			}
+		}
+		void dataGridView_CellFormating(object sender, DataGridViewCellFormattingEventArgs e)
+		{
+			if (e.RowIndex >= 0 && e.RowIndex < (sender as DataGridViewWithFilter).Rows.Count)
+			{
+				DataGridViewRow row = (sender as DataGridViewWithFilter).Rows[e.RowIndex];
+				int index = Array.IndexOf(state_names, (row.DataBoundItem as DataRowView)?[12]?.ToString());
+				row.DefaultCellStyle.BackColor = state_colors[index];
 			}
 		}
 	}

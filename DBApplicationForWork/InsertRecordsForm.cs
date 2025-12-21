@@ -14,12 +14,20 @@ namespace DBApplicationForWork
 	{
 		Connector connector;
 		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+		string[][] table_names =
+{
+			new string[] { "", "", "", "RequestNumbers", "Departments", "Cartridges", "CartridgeInventorys" },
+			new string[] { "", "", "", "RequestNumbers", "Departments", "Printers", "CartridgeInventorys" },
+			new string[] { "", "", "", "RequestNumbers", "Departments", "Computers", "ComputerInventorys" }
+		};
 
+		private int TpIndex { get; set; }
 		private List<short> cartridges;
 		private List<int> inventorys;
-		public InsertRecordsForm()
+		public InsertRecordsForm(int tabpage_index)
 		{
 			InitializeComponent();
+			this.TpIndex = tabpage_index;
 			this.Load += new System.EventHandler(this.MainForm_Load);
 		}
 
@@ -82,7 +90,7 @@ namespace DBApplicationForWork
 			TextBox txtOrderNumber = new TextBox();
 			txtOrderNumber.Name = "txtOrderNumber";
 			txtOrderNumber.Dock = DockStyle.Fill;
-			txtOrderNumber.Text = (connector.GetLastOrderNumber() + 1).ToString();
+			txtOrderNumber.Text = (connector.GetLastOrderNumber(TpIndex) + 1).ToString();
 			txtOrderNumber.KeyPress += new KeyPressEventHandler(textBoxOnlyDigit_KeyPress);
 			tlpBaseInfo.Controls.Add(txtOrderNumber, 1, 0);
 
@@ -108,7 +116,7 @@ namespace DBApplicationForWork
 			ComboBox cbbRequestNumber = new ComboBox();
 			cbbRequestNumber.Name = "cbbRequestNumber";
 			cbbRequestNumber.Dock = DockStyle.Fill;
-			cbbRequestNumber.DataSource = connector.SelectSmallTable("RequestNumbers");
+			cbbRequestNumber.DataSource = connector.SelectSmallTable(table_names[TpIndex][3]);
 			cbbRequestNumber.DisplayMember = "name";
 			cbbRequestNumber.ValueMember = "id";
 			cbbRequestNumber.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -124,7 +132,7 @@ namespace DBApplicationForWork
 			ComboBox cbbDepartment = new ComboBox();
 			cbbDepartment.Name = "cbbDepartment";
 			cbbDepartment.Dock = DockStyle.Fill;
-			cbbDepartment.DataSource = connector.SelectSmallTable("Departments");
+			cbbDepartment.DataSource = connector.SelectSmallTable(table_names[TpIndex][4]);
 			cbbDepartment.DisplayMember = "name";
 			cbbDepartment.ValueMember = "id";
 			cbbDepartment.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -141,7 +149,7 @@ namespace DBApplicationForWork
 			ComboBox cbbCartridge = new ComboBox();
 			cbbCartridge.Name = "cbbCartridge";
 			cbbCartridge.Dock = DockStyle.Fill;
-			cbbCartridge.DataSource = connector.SelectSmallTable("Cartridges");
+			cbbCartridge.DataSource = connector.SelectSmallTable(table_names[TpIndex][5]);
 			cbbCartridge.DisplayMember = "name";
 			cbbCartridge.ValueMember = "id";
 			cbbCartridge.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -157,7 +165,7 @@ namespace DBApplicationForWork
 			ComboBox cbbInventory = new ComboBox();
 			cbbInventory.Name = "cbbInventory";
 			cbbInventory.Dock = DockStyle.Fill;
-			cbbInventory.DataSource = connector.SelectSmallTable("CartridgeInventorys");
+			cbbInventory.DataSource = connector.SelectSmallTable(table_names[TpIndex][6]);
 			cbbInventory.DisplayMember = "name";
 			cbbInventory.ValueMember = "id";
 			cbbInventory.AutoCompleteSource = AutoCompleteSource.ListItems;
@@ -182,8 +190,8 @@ namespace DBApplicationForWork
 			dgvDetails.ReadOnly = true;
 			dgvDetails.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
 			dgvDetails.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-			dgvDetails.Columns.Add("Cartridges", "Наименование");
-			dgvDetails.Columns.Add("CartridgeInventorys", "Инвентарный");
+			dgvDetails.Columns.Add(table_names[TpIndex][5], "Наименование");
+			dgvDetails.Columns.Add(table_names[TpIndex][6], "Инвентарный");
 			tlpDetails.Controls.Add(dgvDetails, 0, 3);
 			tlpDetails.SetColumnSpan(dgvDetails , 2);
 
@@ -240,10 +248,10 @@ namespace DBApplicationForWork
 					{
 						try
 						{
-							int id = connector.InsertOneFieldTable("Cartridges", cbCart.Text.Trim());
+							int id = connector.InsertOneFieldTable(table_names[TpIndex][5], cbCart.Text.Trim());
 							cartridges.Add((short)id);
 							newRow.Cells[0].Value = cbCart.Text.Trim();
-							cbCart.DataSource = connector.SelectSmallTable("Cartridges");
+							cbCart.DataSource = connector.SelectSmallTable(table_names[TpIndex][5]);
 							cbCart.DisplayMember = "name";
 							cbCart.ValueMember = "id";
 						}
@@ -259,10 +267,10 @@ namespace DBApplicationForWork
 					{
 						try
 						{
-							int id = connector.InsertOneFieldTable("CartridgeInventorys", cbInv.Text.Trim());
+							int id = connector.InsertOneFieldTable(table_names[TpIndex][6], cbInv.Text.Trim());
 							inventorys.Add(id);
 							newRow.Cells[1].Value = cbInv.Text.Trim();
-							cbInv.DataSource = connector.SelectSmallTable("CartridgeInventorys");
+							cbInv.DataSource = connector.SelectSmallTable(table_names[TpIndex][6]);
 							cbInv.DisplayMember = "name";
 							cbInv.ValueMember = "id";
 						}
@@ -306,7 +314,7 @@ namespace DBApplicationForWork
 					{
 						try
 						{
-							request_number = connector.InsertOneFieldTable("RequestNumbers", cbbRequestNumber.Text.Trim());
+							request_number = connector.InsertOneFieldTable(table_names[TpIndex][3], cbbRequestNumber.Text.Trim());
 						}
 						catch (Exception ex) { MessageBox.Show(ex.Message); }
 					}
@@ -318,13 +326,14 @@ namespace DBApplicationForWork
 					{
 						try
 						{
-							department = (short)connector.InsertOneFieldTable("Departments", cbbDepartment.Text.Trim());
+							department = (short)connector.InsertOneFieldTable(table_names[TpIndex][4], cbbDepartment.Text.Trim());
 						}
 						catch (Exception ex) { MessageBox.Show(ex.Message); }
 					}
 				}
-			int result = connector.InsertCartridgeRecords
+			int result = connector.InsertRecords
 									(
+									TpIndex,
 									Convert.ToInt32(txtOrederNUmber.Text),
 									dtpRecordingDate.Value.ToString("yyyy-MM-dd"),
 									request_number,
