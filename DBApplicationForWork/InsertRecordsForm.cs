@@ -235,7 +235,7 @@ namespace DBApplicationForWork
 			newRow.Cells.Add(new DataGridViewTextBoxCell());
 			newRow.Cells.Add(new DataGridViewTextBoxCell());
 
-			if(cbCart != null && cbInv != null)
+			if(cbCart != null && cbInv != null && cartridges.Count < 28 && inventorys.Count < 28)
 			{
 				if(!string.IsNullOrWhiteSpace(cbCart.Text) && !string.IsNullOrWhiteSpace(cbInv.Text))
 				{
@@ -257,7 +257,6 @@ namespace DBApplicationForWork
 						}
 						catch (Exception ex) { MessageBox.Show(ex.Message); }
 					}
-
 					if (cbInv.SelectedIndex != -1)
 					{
 						inventorys.Add(Convert.ToInt32(cbInv.SelectedValue));

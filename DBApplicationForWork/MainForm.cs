@@ -4,6 +4,8 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Printing;
+using System.IO;
 using System.Linq;
 using System.Net.Cache;
 using System.Net.Http.Headers;
@@ -12,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using Word = Microsoft.Office.Interop.Word;
 
 namespace DBApplicationForWork
 {
@@ -25,8 +28,8 @@ namespace DBApplicationForWork
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
 		string[] dataGrid_names = new string[] { "dgCartridges", "dgPrinters", "dgComputers" };
 		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
-		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "списание"};
-		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.White};
+		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "списание", "ждёт запчастей"};
+		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.White, Color.Coral};
 		string[] field_names = new string[] 
 		{
 			"ID",
@@ -238,19 +241,6 @@ namespace DBApplicationForWork
 			tlp.SetColumnSpan(gb, 2);
 			rb1.Checked = true;
 		}
-		void loadDataGridView()
-		{
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
-			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
-			if (tc != null && dgv != null)
-			{
-				dgv.DataSource = connector.SelectRecords(table_names[tc.SelectedIndex]);
-			}
-			if (dgv.Rows.Count > 0)
-			{
-				dgv.FirstDisplayedScrollingRowIndex = dgv.Rows.Count - 1;
-			}
-		}
 
 //ContextMenuStrip
 
@@ -297,12 +287,14 @@ namespace DBApplicationForWork
 			cms.ShowImageMargin = false;
 			cms.ShowCheckMargin = false;
 			ToolStripMenuItem tsmiMainP1 = new ToolStripMenuItem("Распечатать наряд");
-			tsmiMainP1.Name = "tsmiMainP_1";
+			tsmiMainP1.Name = "tsmiMainP_order";
 			tsmiMainP1.Padding = new Padding(0, 2, 0, 2);
+			tsmiMainP1.Click += new EventHandler(tsmiPrint_Click);
 			cms.Items.Add(tsmiMainP1);
 			ToolStripMenuItem tsmiMainP2 = new ToolStripMenuItem("Распечатать акт фирмы");
-			tsmiMainP2.Name = "tsmiMainP_2";
+			tsmiMainP2.Name = "tsmiMainP_act";
 			tsmiMainP2.Padding = new Padding(0, 2, 0, 2);
+			tsmiMainP2.Click += new EventHandler(tsmiPrint_Click);
 			cms.Items.Add(tsmiMainP2);
 			return cms;
 		}
@@ -318,22 +310,22 @@ namespace DBApplicationForWork
 			{
 				ToolStripMenuItem item = new ToolStripMenuItem(field_names[i]);
 				item.Name = $"tsmiEditMenu_{i}";
-				item.Padding = new Padding(0, 2, 0, 2);
 				item.Click += new EventHandler(tsmiEditFields_Click);
 				editMenu.DropDownItems.Add(item);
 			}
 			ToolStripMenuItem stateMenu = new ToolStripMenuItem(panel_btn_names[2]);
-			for(int i = 1; i < state_names.Length; i++)
+			for (int i = 1; i < state_names.Length; i++)
 			{
 				ToolStripMenuItem item = new ToolStripMenuItem(state_names[i]);
 				item.Name = $"tsmiStateMenu_{i}";
-				item.Padding = new Padding(0, 2, 0, 2);
+				item.BackColor = state_colors[i];
 				item.Click += new EventHandler(tsmiChangeStates_Click);
 				stateMenu.DropDownItems.Add(item);
 			}
 			cms.Items.Add(editMenu);
 			cms.Items.Add(stateMenu);
 			ToolStripMenuItem refreshMenu = new ToolStripMenuItem(panel_btn_names[4]);
+			refreshMenu.Click += new EventHandler(btnMainRefresh_Click);
 			cms.Items.Add(refreshMenu);
 			foreach (ToolStripItem item in cms.Items)
 				item.Padding = new Padding(0, 2, 0, 2);
@@ -455,6 +447,76 @@ namespace DBApplicationForWork
 				loadDataGridView();
 			}
 		}
+		void tsmiPrint_Click(object sender, EventArgs e)
+		{
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			if (true)
+			{
+				Word.Application wordApp = null;
+				Word.Document wordDoc = null;
+				string documentPath = string.Empty;
+				try
+				{
+					wordApp = new Word.Application();
+					wordApp.Visible = false;
+
+					if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order")
+						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\order.docx"));
+					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
+						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\act.docx"));
+
+					wordDoc = wordApp.Documents.Open(documentPath);
+
+					if((sender as ToolStripMenuItem).Name == "tsmiMainP_order")
+						fillOrderTable(tc.SelectedIndex, wordDoc);
+					else if((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
+						FillActTable(tc.SelectedIndex, wordDoc);
+
+					//wordApp.ActiveWindow.View.Type = Word.WdViewType.wdPrintPreview;
+					//MessageBox.Show("Нажмите OK для печати после предпросмотра");
+
+					PrintDialog printDialog = new PrintDialog();
+					PrinterSettings settings = new PrinterSettings();
+
+					printDialog.PrinterSettings = settings;
+					printDialog.AllowSomePages = true;
+					printDialog.ShowNetwork = true;
+
+					if (printDialog.ShowDialog() == DialogResult.OK)
+					{
+						wordDoc.PrintOut();
+						MessageBox.Show("Документ отправлен на печать!", "Успех",MessageBoxButtons.OK, MessageBoxIcon.Information);
+					}
+
+				}
+				catch (Exception ex)
+				{
+					MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
+						MessageBoxButtons.OK, MessageBoxIcon.Error);
+				}
+				finally
+				{
+					if (wordDoc != null)
+					{
+						wordDoc.Close(false);
+						System.Runtime.InteropServices.Marshal.ReleaseComObject(wordDoc);
+					}
+
+					if (wordApp != null)
+					{
+						wordApp.Quit(false);
+						System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp);
+					}
+
+					GC.Collect();
+					GC.WaitForPendingFinalizers();
+				} 
+			}
+			else
+			{
+				throw new Exception("Find controls failed");
+			}
+		}
 		void viewCheckBoxs_CheckChanged(object sender, EventArgs e)
 		{
 			CheckBox cb = sender as CheckBox;
@@ -502,6 +564,99 @@ namespace DBApplicationForWork
 					(this.Controls.Find("rb_fill", true).FirstOrDefault() as RadioButton).Checked = true;
 				else
 					(this.Controls.Find("rb_cell", true).FirstOrDefault() as RadioButton).Checked = true;
+			}
+		}
+
+//Functions
+		
+		void loadDataGridView()
+		{
+			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (tc != null && dgv != null)
+			{
+				dgv.DataSource = connector.SelectRecords(table_names[tc.SelectedIndex]);
+			}
+			if (dgv.Rows.Count > 0)
+			{
+				dgv.FirstDisplayedScrollingRowIndex = dgv.Rows.Count - 1;
+			}
+		}
+		void fillOrderTable(int tabpage_index, Word.Document wordDoc)
+		{
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tabpage_index], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (dgv != null)
+			{
+				if (wordDoc.Tables.Count > 1)
+				{
+					Word.Table table1 = wordDoc.Tables[1];
+					Word.Table table2 = wordDoc.Tables[2];
+
+					table1.Cell(1, 3).Range.Text = dgv.CurrentRow.Cells[1].Value.ToString();
+					DateTime date = Convert.ToDateTime(dgv.CurrentRow.Cells[2].Value);
+					table1.Cell(1, 5).Range.Text = date.Day.ToString();
+					table1.Cell(1, 7).Range.Text = date.Month.ToString();
+					table1.Cell(1, 8).Range.Text = date.Year.ToString();
+					table1.Cell(5, 2).Range.Text = dgv.CurrentRow.Cells[4].Value.ToString();
+
+					DataTable dt = connector.GetOrderInfo(tabpage_index, dgv.CurrentRow.Cells[1].Value.ToString(), date.ToString("yyyy-MM-dd"));
+					for (int i = 0; i < dt.Rows.Count; i++)
+					{
+						int rowNumber = i + 3;
+						if (rowNumber <= table2.Rows.Count)
+						{
+							table2.Cell(rowNumber, 2).Range.Text = dt.Rows[i][0].ToString();
+							table2.Cell(rowNumber, 3).Range.Text = dt.Rows[i][1].ToString();
+						}
+					}
+				}
+				else
+				{
+					throw new Exception("В документе не найдена таблица");
+				} 
+			}
+			else
+			{
+				throw new Exception("Find controls failed");
+			}
+		}
+		void FillActTable(int tabpage_index, Word.Document wordDoc)
+		{
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tabpage_index], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (dgv != null)
+			{
+				string act_number = dgv.CurrentRow.Cells[9].Value.ToString();
+				if (!string.IsNullOrWhiteSpace(act_number))
+				{
+					if (wordDoc.Tables.Count > 1)
+					{
+						Word.Table table = wordDoc.Tables[2];
+						DataTable dt = connector.GetActInfo(tabpage_index, act_number);
+						for (int i = 0; i < dt.Rows.Count; i++)
+						{
+							int rowNumber = i + 2;
+							if (rowNumber <= table.Rows.Count)
+							{
+								table.Cell(rowNumber, 2).Range.Text = dt.Rows[i][0].ToString();
+								table.Cell(rowNumber, 3).Range.Text = dt.Rows[i][1].ToString();
+								table.Cell(rowNumber, 4).Range.Text = dt.Rows[i][2].ToString();
+								table.Cell(rowNumber, 5).Range.Text = dt.Rows[i][3].ToString();
+							}
+						}
+					}
+					else
+					{
+						throw new Exception("В документе не найдена таблица");
+					}  
+				}
+				else
+				{
+					throw new Exception("В выделенной строке номер акта отсуствует");
+				}
+			}
+			else
+			{
+				throw new Exception("Find controls failed");
 			}
 		}
 	}

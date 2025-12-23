@@ -220,6 +220,53 @@ namespace DBApplicationForWork
 			} finally { CloseConnection(); }
 			return number;
 		}
+		public DataTable GetOrderInfo(int tabpage_index, string order_number, string date)
+		{
+			string[] queries = new string[]
+			{
+				"SELECT Cartridges.name,CartridgeInventorys.name FROM CartridgeRecords,Cartridges,CartridgeInventorys WHERE cartridge=Cartridges.id AND inventory_number=CartridgeInventorys.id AND order_number=@order_number AND recording_date=@date;",
+				"SELECT Printers.name,CartridgeInventorys.name FROM PrinterRecords,Printers,CartridgeInventorys WHERE printer=Printers.id AND inventory_number=CartridgeInventorys.id AND order_number=@order_number AND recording_date=@date;",
+				"SELECT Computers.name,ComputerInventorys.name FROM CartridgeRecords,Computers,ComputerInventorys WHERE computer=Computers.id AND inventory_number=ComputerInventorys.id AND order_number=@order_number AND recording_date=@date;"
+			};
+			DataTable dt = new DataTable();
+			try
+			{
+				OpenConnection();
+				using (SqlCommand cmd = new SqlCommand(queries[tabpage_index], _connection))
+				{
+					cmd.Parameters.Add("@order_number", SqlDbType.Int).Value= order_number;
+					cmd.Parameters.Add("@date", SqlDbType.Date).Value= date;
+					using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+					{
+						adapter.Fill(dt);
+					}
+				}
+			}finally { CloseConnection(); }
+			return dt;
+		}
+		public DataTable GetActInfo(int tabpage_index, string act_number)
+		{
+			string[] queries = new string[]
+			{
+				"SELECT Departments.name,Cartridges.name,CartridgeInventorys.name,remark FROM CartridgeRecords,Departments,Cartridges,CartridgeInventorys WHERE department=Departments.id AND cartridge=Cartridges.id AND inventory_number=CartridgeInventorys.id AND company_act=@act_number AND [state]=2;",
+				"SELECT Departments.name,Printers.name,CartridgeInventorys.name,remark FROM PrinterRecords,Departments,Printers,CartridgeInventorys WHERE department=Departments.id AND printer=Printers.id AND inventory_number=CartridgeInventorys.id AND AND company_act=@act_number AND [state]=2;",
+				"SELECT Departments.name,Computers.name,ComputerInventorys.name,remark FROM CartridgeRecords,Departments,Computers,ComputerInventorys WHERE department=Departments.id AND computer=Computers.id AND inventory_number=ComputerInventorys.id AND AND company_act=@act_number AND [state]=2;"
+			};
+			DataTable dt = new DataTable();
+			try
+			{
+				OpenConnection();
+				using (SqlCommand cmd = new SqlCommand(queries[tabpage_index], _connection))
+				{
+					cmd.Parameters.Add("@act_number", SqlDbType.SmallInt).Value = act_number;
+					using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+					{
+						adapter.Fill(dt);
+					}
+				}
+			}finally { CloseConnection() ; }
+			return dt;
+		}
 		public void Dispose()
 		{
 			_connection?.Dispose();
