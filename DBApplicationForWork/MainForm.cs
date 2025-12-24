@@ -68,6 +68,8 @@ namespace DBApplicationForWork
 			tcPanel.Height = 120;
 			tcPanel.SizeMode = TabSizeMode.Fixed;
 			tcPanel.ItemSize = new Size(300, 20);
+			tcPanel.DrawMode = TabDrawMode.OwnerDrawFixed;
+			tcPanel.DrawItem += new DrawItemEventHandler(tabControl_DrawItem);
 			
 			TabPage tpPanelMain = new TabPage(panel_tp_names[0]);
 			TabPage tpPanelView = new TabPage(panel_tp_names[1]);
@@ -551,9 +553,35 @@ namespace DBApplicationForWork
 					(this.Controls.Find("rb_cell", true).FirstOrDefault() as RadioButton).Checked = true;
 			}
 		}
+		void tabControl_DrawItem(object sender, DrawItemEventArgs e)
+		{
+			Font fntTab;
+			Brush bshBack;
+			Brush bshFore;
+			if (e.Index == (sender as TabControl).SelectedIndex)
+			{
+				fntTab = new Font(e.Font, FontStyle.Bold);
+				bshBack = new System.Drawing.Drawing2D.LinearGradientBrush(e.Bounds, Color.LightSkyBlue, Color.LightGreen, System.Drawing.Drawing2D.LinearGradientMode.BackwardDiagonal);
+				bshFore = Brushes.Blue;
+			}
+			else
+			{
+				fntTab = e.Font;
+				bshBack = new SolidBrush(Color.White);
+				bshFore = new SolidBrush(Color.Black);
+			}
+			string tabName = (sender as TabControl).TabPages[e.Index].Text;
+			StringFormat sftTab = new StringFormat(StringFormatFlags.NoClip);
+			sftTab.Alignment = StringAlignment.Center;
+			sftTab.LineAlignment = StringAlignment.Center;
+			e.Graphics.FillRectangle(bshBack, e.Bounds);
+			Rectangle recTab = e.Bounds;
+			recTab = new Rectangle(recTab.X, recTab.Y + 4, recTab.Width, recTab.Height - 4);
+			e.Graphics.DrawString(tabName, fntTab, bshFore, recTab, sftTab);
+		}
 
-//Functions
-		
+		//Functions
+
 		void loadDataGridView()
 		{
 			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
