@@ -235,7 +235,13 @@ namespace DBApplicationForWork
 			newRow.Cells.Add(new DataGridViewTextBoxCell());
 			newRow.Cells.Add(new DataGridViewTextBoxCell());
 
-			if(cbCart != null && cbInv != null && cartridges.Count < 28 && inventorys.Count < 28)
+			int limit = 0;
+			if (TpIndex == 0)
+				limit = 28;
+			else
+				limit = 1;
+
+			if(cbCart != null && cbInv != null && cartridges.Count < limit && inventorys.Count < limit)
 			{
 				if(!string.IsNullOrWhiteSpace(cbCart.Text) && !string.IsNullOrWhiteSpace(cbInv.Text))
 				{

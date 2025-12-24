@@ -28,8 +28,8 @@ namespace DBApplicationForWork
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
 		string[] dataGrid_names = new string[] { "dgCartridges", "dgPrinters", "dgComputers" };
 		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
-		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "списание", "ждёт запчастей"};
-		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.White, Color.Coral};
+		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "ждёт запчастей"};
+		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.Coral};
 		string[] field_names = new string[] 
 		{
 			"ID",
@@ -425,25 +425,6 @@ namespace DBApplicationForWork
 				foreach (DataGridViewRow row in dgv.SelectedRows)
 					ids.Add(Convert.ToInt32(row.Cells[0].Value));
 				connector.UpdateRecords(tc.SelectedIndex, 12, $"{index}", ids);
-				switch (index)
-				{
-					//в фирме
-					case 3:
-						connector.UpdateRecords(tc.SelectedIndex, 8, (DateTime.Now).ToString("yyyy-MM-dd"), ids);
-						break;
-					//готов
-					//списание
-					case 4:
-					case 6:
-						connector.UpdateRecords(tc.SelectedIndex, 10, (DateTime.Now).ToString("yyyy-MM-dd"), ids);
-						break;
-					//выдан
-					case 5:
-						connector.UpdateRecords(tc.SelectedIndex, 11, (DateTime.Now).ToString("yyyy-MM-dd"), ids);
-						break;
-					default:
-						break;
-				};
 				loadDataGridView();
 			}
 		}
@@ -460,17 +441,21 @@ namespace DBApplicationForWork
 					wordApp = new Word.Application();
 					wordApp.Visible = false;
 
-					if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order")
+					if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex == 0)
 						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\order.docx"));
+					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex > 0)
+						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\order_comp.docx"));
 					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
 						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\act.docx"));
 
 					wordDoc = wordApp.Documents.Open(documentPath);
 
-					if((sender as ToolStripMenuItem).Name == "tsmiMainP_order")
-						fillOrderTable(tc.SelectedIndex, wordDoc);
-					else if((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
-						FillActTable(tc.SelectedIndex, wordDoc);
+					if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex == 0)
+						fillOrderTableForCartridges(tc.SelectedIndex, wordDoc);
+					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex > 0)
+						fillOrderTableForComputersAndPrinters(tc.SelectedIndex, wordDoc);
+					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
+						FillActTableForCartridges(tc.SelectedIndex, wordDoc);
 
 					//wordApp.ActiveWindow.View.Type = Word.WdViewType.wdPrintPreview;
 					//MessageBox.Show("Нажмите OK для печати после предпросмотра");
@@ -582,7 +567,7 @@ namespace DBApplicationForWork
 				dgv.FirstDisplayedScrollingRowIndex = dgv.Rows.Count - 1;
 			}
 		}
-		void fillOrderTable(int tabpage_index, Word.Document wordDoc)
+		void fillOrderTableForCartridges(int tabpage_index, Word.Document wordDoc)
 		{
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tabpage_index], true).FirstOrDefault() as DataGridViewWithFilter;
 			if (dgv != null)
@@ -620,7 +605,40 @@ namespace DBApplicationForWork
 				throw new Exception("Find controls failed");
 			}
 		}
-		void FillActTable(int tabpage_index, Word.Document wordDoc)
+		void fillOrderTableForComputersAndPrinters(int tabpage_index, Word.Document wordDoc)
+		{
+			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tabpage_index], true).FirstOrDefault() as DataGridViewWithFilter;
+			if (dgv != null)
+			{
+				if (wordDoc.Tables.Count > 1)
+				{
+					Word.Table table1 = wordDoc.Tables[1];
+					Word.Table table2 = wordDoc.Tables[2];
+
+					table1.Cell(1, 3).Range.Text = dgv.CurrentRow.Cells[1].Value.ToString();
+					DateTime date = Convert.ToDateTime(dgv.CurrentRow.Cells[2].Value);
+					table1.Cell(1, 5).Range.Text = date.Day.ToString();
+					table1.Cell(1, 7).Range.Text = date.Month.ToString();
+					table1.Cell(1, 8).Range.Text = date.Year.ToString();
+					if (dgv.CurrentRow.Cells[3].Value.ToString() == "отсутствует")
+						table1.Cell(3, 2).Range.Text = "";
+					else
+						table1.Cell(3, 2).Range.Text = dgv.CurrentRow.Cells[3].Value.ToString();
+					table1.Cell(5, 2).Range.Text = dgv.CurrentRow.Cells[4].Value.ToString();
+					table2.Cell(3, 1).Range.Text = dgv.CurrentRow.Cells[6].Value.ToString();
+					table2.Cell(3, 4).Range.Text = dgv.CurrentRow.Cells[5].Value.ToString();
+				}
+				else
+				{
+					throw new Exception("В документе не найдена таблица");
+				} 
+			}
+			else
+			{
+				throw new Exception("Find controls failed");
+			}
+		}
+		void FillActTableForCartridges(int tabpage_index, Word.Document wordDoc)
 		{
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tabpage_index], true).FirstOrDefault() as DataGridViewWithFilter;
 			if (dgv != null)
