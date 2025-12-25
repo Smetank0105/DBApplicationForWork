@@ -173,7 +173,7 @@ namespace DBApplicationForWork
 			tlpDetails.Controls.Add(cbbInventory, 1, 1);
 
 			//Create button "add to list"
-			Button btnAddToList = new Button();
+			BeautyButton btnAddToList = new BeautyButton();
 			btnAddToList.Name = "btnAddToList";
 			btnAddToList.Dock = DockStyle.Fill;
 			btnAddToList.Text = "Добавить";
@@ -196,21 +196,21 @@ namespace DBApplicationForWork
 			tlpDetails.SetColumnSpan(dgvDetails , 2);
 
 			//Create buttons "Clear", "Ok" and "Cancel"
-			Button btnClear = new Button();
+			BeautyButton btnClear = new BeautyButton();
 			btnClear.Name = "btnClear";
 			btnClear.Dock = DockStyle.Fill;
 			btnClear.Text = "Очистить";
 			btnClear.Click += new EventHandler(btnClear_Click);
 			tlpDetails.Controls.Add(btnClear, 0, 4);
 
-			Button btnOk = new Button();
+			BeautyButton btnOk = new BeautyButton();
 			btnOk.Name = "btnOk";
 			btnOk.Size = new Size(80, 30);
 			btnOk.DialogResult = DialogResult.OK;
 			btnOk.Text = "OK";
 			btnOk.Click += new EventHandler(btnOk_Click);
 
-			Button btnCancel = new Button();
+			BeautyButton btnCancel = new BeautyButton();
 			btnCancel.Name = "btnCancel";
 			btnCancel.Size = new Size(80, 30);
 			btnCancel.DialogResult = DialogResult.Cancel;

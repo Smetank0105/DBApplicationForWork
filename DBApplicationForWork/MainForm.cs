@@ -69,7 +69,6 @@ namespace DBApplicationForWork
 			tcPanel.PanelBtnHeight = 30;
 			tcPanel.TabBtnWidth = 300;
 			tcPanel.Height = 130;
-
 			this.Controls.Add(tcPanel);
 
 //Create LayoutPanel for "tpPanelMain" and "tpPanelView"
@@ -79,7 +78,6 @@ namespace DBApplicationForWork
 			flpMain.AutoScroll = true;
 			flpMain.WrapContents = false;
 			flpMain.FlowDirection = FlowDirection.LeftToRight;
-			tcPanel.AddTab(panel_tp_names[0], flpMain);
 
 			TableLayoutPanel tlpView = new TableLayoutPanel();
 			tlpView.Dock = DockStyle.Fill;
@@ -88,7 +86,10 @@ namespace DBApplicationForWork
 			tlpView.RowCount = 2;
 			tlpView.ColumnCount = field_names.Length - 1;
 			tlpView.AutoSize = true;
+
 			tcPanel.AddTab(panel_tp_names[1], tlpView);
+			tcPanel.AddTab(panel_tp_names[0], flpMain);
+			tcPanel.SelectedIndex = 1;
 
 //Create UCBeautyTabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
 
@@ -117,14 +118,14 @@ namespace DBApplicationForWork
 			int btnWidth = 160;
 			int btnHeight = 50;
 
-			Button[] buttonsMain = new Button[]
+			BeautyButton[] buttonsMain = new BeautyButton[]
 			{
-				new Button {Text = panel_btn_names[0], Name = "btnNewOrder", Font = new Font(font_name, font_size)},
-				new Button {Text = panel_btn_names[1], Name = "btnEditFields", Font = new Font(font_name, font_size)},
-				new Button {Text = panel_btn_names[2], Name = "btnChangeStates", Font = new Font(font_name, font_size)},
-				new Button {Text = panel_btn_names[3], Name = "btnPrint", Font = new Font(font_name, font_size)},
-				new Button {Text = panel_btn_names[4], Name = "btnRefresh", Font = new Font(font_name, font_size)},
-				new Button {Text = panel_btn_names[5], Name = "btnDelete", Font = new Font(font_name, font_size)}
+				new BeautyButton {Text = panel_btn_names[0], Name = "btnNewOrder", Font = new Font(font_name, font_size)},
+				new BeautyButton {Text = panel_btn_names[1], Name = "btnEditFields", Font = new Font(font_name, font_size)},
+				new BeautyButton {Text = panel_btn_names[2], Name = "btnChangeStates", Font = new Font(font_name, font_size)},
+				new BeautyButton {Text = panel_btn_names[3], Name = "btnPrint", Font = new Font(font_name, font_size)},
+				new BeautyButton {Text = panel_btn_names[4], Name = "btnRefresh", Font = new Font(font_name, font_size)},
+				new BeautyButton {Text = panel_btn_names[5], Name = "btnDelete", Font = new Font(font_name, font_size)}
 			};
 			for (int i = 0; i < buttonsMain.Length; i++)
 			{

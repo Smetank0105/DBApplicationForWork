@@ -63,13 +63,13 @@ namespace DBApplicationForWork
 			tlp.Controls.Add(flp, 0, 1);
 			tlp.SetColumnSpan(flp, 2);
 
-			Button btnCancel = new Button();
+			BeautyButton btnCancel = new BeautyButton();
 			btnCancel.Size = new Size(80, 30);
 			btnCancel.Text = "Cancel";
 			btnCancel .DialogResult = DialogResult.Cancel;
 			flp.Controls.Add(btnCancel);
 
-			Button btnOk = new Button();
+			BeautyButton btnOk = new BeautyButton();
 			btnOk.Name = "btnOk";
 			btnOk.Size = new Size(80, 30);
 			btnOk.Text = "Ok";
@@ -108,7 +108,7 @@ namespace DBApplicationForWork
 					tlp.SetColumnSpan(dtp, 2);
 					if (FieldIndex != 2)
 					{
-						Button btnClear = new Button();
+						BeautyButton btnClear = new BeautyButton();
 						btnClear.Name = "btnClear";
 						btnClear.Size = new Size(80, 30);
 						btnClear.Text = "Очистить";

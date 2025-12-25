@@ -12,11 +12,11 @@ namespace DBApplicationForWork
 {
     public partial class UCBeautyTabControl : UserControl
     {
-        private Color panelBackColor = SystemColors.Window;
-        private Color btnSelectedBackColor = SystemColors.Highlight;
-        private Color btnSelectedForeColor = SystemColors.HighlightText;
-        private Color btnUnselectedBackColor = SystemColors.Control;
-        private Color btnUnselectedForeColor = SystemColors.ControlText;
+        private Color panelBackColor = Color.WhiteSmoke;
+        private Color btnSelectedBackColor = Color.SteelBlue;
+        private Color btnSelectedForeColor = Color.WhiteSmoke;
+        private Color btnUnselectedBackColor = Color.LightSteelBlue;
+        private Color btnUnselectedForeColor = Color.White;
         private DockStyle btnDockStyle = DockStyle.Left;
         private DockStyle panelBtnDockStyle = DockStyle.Top;
         private DockStyle panelContentDockStyle = DockStyle.Fill;
@@ -49,7 +49,7 @@ namespace DBApplicationForWork
         public int SelectedIndex
         {
             get => selectedIndex;
-            private set
+            set
             {
                 if (value != selectedIndex && value > -1 && value < tabPages.Count)
                 {

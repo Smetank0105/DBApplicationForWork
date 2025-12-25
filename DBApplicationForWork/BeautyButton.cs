@@ -13,7 +13,7 @@ namespace DBApplicationForWork
     {
         private int borderSize = 0;
         private int borderRadius = 10;
-        private Color borderColor = Color.Coral;
+        private Color borderColor = Color.Olive;
 
         public int BorderSize { get => borderSize; set { borderSize = value; this.Invalidate(); } }
         public int BorderRadius { get => borderRadius; set { borderRadius = value; this.Invalidate(); } }
@@ -23,9 +23,8 @@ namespace DBApplicationForWork
         {
             this.FlatStyle = FlatStyle.Flat;
             this.FlatAppearance.BorderSize = 0;
-            //this.Size = new Size(150, 30);
-            this.BackColor = Color.MediumSlateBlue;
-            this.ForeColor = Color.White;
+            this.BackColor = Color.SteelBlue;
+            this.ForeColor = Color.WhiteSmoke;
             this.Resize += new EventHandler(Button_Resize);
         }
 
