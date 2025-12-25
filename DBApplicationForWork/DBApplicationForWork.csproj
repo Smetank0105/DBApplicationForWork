@@ -69,6 +69,12 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="UCBeautyTabControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UCBeautyTabControl.Designer.cs">
+      <DependentUpon>UCBeautyTabControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="UpdateRecordsForm.cs">
       <SubType>Form</SubType>
     </Compile>

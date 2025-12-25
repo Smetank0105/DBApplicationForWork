@@ -22,7 +22,7 @@ namespace DBApplicationForWork
 	{
 		Connector connector;
 
-		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
+		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=5;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
 		string[] table_names = new string[] { "CartridgeRecords", "PrinterRecords", "ComputerRecords" };
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
@@ -47,7 +47,7 @@ namespace DBApplicationForWork
 			"статус"
 		};
 		const string font_name = "Arial";
-		const int font_size = 12;
+		const int font_size = 10;
 
 		public MainForm()
 		{
@@ -62,70 +62,59 @@ namespace DBApplicationForWork
 			this.Size = new Size(1000, 700);
 
 //Create TabControl "tcPanel" with TabPages "tpMain" and "tpView"
-			TabControl tcPanel = new TabControl();
+
+			UCBeautyTabControl tcPanel = new UCBeautyTabControl();
 			tcPanel.Name = "tcPanel";
 			tcPanel.Dock = DockStyle.Top;
-			tcPanel.Height = 120;
-			tcPanel.SizeMode = TabSizeMode.Fixed;
-			tcPanel.ItemSize = new Size(300, 20);
-			
-			TabPage tpPanelMain = new TabPage(panel_tp_names[0]);
-			TabPage tpPanelView = new TabPage(panel_tp_names[1]);
-			tcPanel.TabPages.Add(tpPanelMain);
-			tcPanel.TabPages.Add(tpPanelView);
+			tcPanel.PanelBtnHeight = 30;
+			tcPanel.TabBtnWidth = 300;
+			tcPanel.Height = 130;
 
 			this.Controls.Add(tcPanel);
 
 //Create LayoutPanel for "tpPanelMain" and "tpPanelView"
 			FlowLayoutPanel flpMain = new FlowLayoutPanel();
 			flpMain.Dock = DockStyle.Fill;
+			flpMain.Padding = new Padding(10, 60, 10, 0);
 			flpMain.AutoScroll = true;
 			flpMain.WrapContents = false;
 			flpMain.FlowDirection = FlowDirection.LeftToRight;
-			flpMain.Padding = new Padding(20);
-			tpPanelMain.Controls.Add(flpMain);
+			tcPanel.AddTab(panel_tp_names[0], flpMain);
 
 			TableLayoutPanel tlpView = new TableLayoutPanel();
 			tlpView.Dock = DockStyle.Fill;
+			tlpView.Padding = new Padding(10, 40, 10, 0);
 			tlpView.AutoScroll = true;
-			tlpView.Padding = new Padding(10);
 			tlpView.RowCount = 2;
 			tlpView.ColumnCount = field_names.Length - 1;
 			tlpView.AutoSize = true;
-			tpPanelView.Controls.Add(tlpView);
+			tcPanel.AddTab(panel_tp_names[1], tlpView);
 
-//Create TabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
-			TabControl tcDataBase = new TabControl();
+//Create UCBeautyTabControl "tcDataBase" with TabPages "tpCartridges", "tpPrinters" and "tpComputers"
+
+			UCBeautyTabControl tcDataBase = new UCBeautyTabControl();
 			tcDataBase.Name = "tcDataBase";
-			tcDataBase.Bounds = new Rectangle(0, 120, 985, 540);
-			tcDataBase.Anchor = (AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right) | AnchorStyles.Bottom);
-			tcDataBase.SizeMode = TabSizeMode.Fixed;
-			tcDataBase.ItemSize = new Size (200, 30);
-			tcDataBase.Alignment = TabAlignment.Right;
-			tcDataBase.SelectedIndexChanged += new EventHandler(tcDataBase_SelectedIndexChanged);
+			tcDataBase.Dock = DockStyle.Fill;
+			tcDataBase.PanelBtnDockStyle = DockStyle.Bottom;
 
-			TabPage tpCartridges = new TabPage(database_tp_names[0]);
-			TabPage tpPrinters = new TabPage(database_tp_names[1]);
-			TabPage tpComputers = new TabPage(database_tp_names[2]);
-			tcDataBase.TabPages.Add(tpCartridges);
-			tcDataBase.TabPages.Add(tpPrinters);
-			tcDataBase.TabPages.Add(tpComputers);
-
-			this.Controls.Add(tcDataBase);
+            this.Controls.Add(tcDataBase);
 
 //Create Buttons for "tcPanel->tpMain"
-			addMainButtons(flpMain);
+            addMainButtons(flpMain);
 
 //Create DataGridViewWithFilter for all TabPages in "tcDataBase"
 			addDataGridViewWithFilters(tcDataBase);
 
-//Create TextBox and CheckBox for "tcPnale->tpView"
+//Create GroupBox and CheckBox for "tcPnale->tpView"
 			addViewGroupBoxForDataGridColumnWidth(tlpView);
 			addViewCheckBoxes(tlpView);
+
+//Subscribe on tcDataBase_SelectedIndexChanged after initialize ViewGroupBoxForDataGridColumnWdth
+			tcDataBase.SelectedIndexChanged += new EventHandler(tcDataBase_SelectedIndexChanged);
 		}
 		void addMainButtons(FlowLayoutPanel flp)
 		{
-			int btnWidth = 150;
+			int btnWidth = 160;
 			int btnHeight = 50;
 
 			Button[] buttonsMain = new Button[]
@@ -156,7 +145,7 @@ namespace DBApplicationForWork
 			buttonsMain[4].Click += new EventHandler(btnMainRefresh_Click);
 			buttonsMain[5].Click += new EventHandler(btnMainDelete_Click);
 		}
-		void addDataGridViewWithFilters(TabControl tc)
+		void addDataGridViewWithFilters(UCBeautyTabControl tc)
 		{
 			DataGridViewWithFilter[] dGrids = new DataGridViewWithFilter[]
 			{
@@ -166,7 +155,7 @@ namespace DBApplicationForWork
 			};
 			for (int i = 0; i < dGrids.Length; i++)
 			{
-				tc.TabPages[i].Controls.Add(dGrids[i]);
+				tc.AddTab(database_tp_names[i], dGrids[i]);
 				dGrids[i].Dock = DockStyle.Fill;
 				dGrids[i].AllowUserToAddRows = false;
 				dGrids[i].AllowUserToDeleteRows = false;
@@ -179,7 +168,7 @@ namespace DBApplicationForWork
 				dGrids[i].AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 				dGrids[i].CellContextMenuStripNeeded += new DataGridViewCellContextMenuStripNeededEventHandler(dataGridView_CellContextMenuNeeded);
 				dGrids[i].CellFormatting += new DataGridViewCellFormattingEventHandler(dataGridView_CellFormating);
-				dGrids[i].DataSource = connector.SelectRecords(table_names[i]);
+				//dGrids[i].DataSource = connector.SelectRecords(table_names[i]);
 				for (int j = 0; j < dGrids[i].ColumnCount; j++)
 					dGrids[i].Columns[j].SortMode = DataGridViewColumnSortMode.NotSortable;
 				if (dGrids[i].Columns.Count > 0)dGrids[i].Columns[0].Visible = false;
@@ -341,7 +330,7 @@ namespace DBApplicationForWork
 		}
 		void btnMainNewOrder_Click(object sender, EventArgs e)
 		{
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			if (tc != null)
 			{
 				InsertRecordsForm form = new InsertRecordsForm(tc.SelectedIndex);
@@ -374,7 +363,7 @@ namespace DBApplicationForWork
 		void btnMainDelete_Click(object sender, EventArgs e)
 		{
 			List<int> ids = new List<int>();
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			foreach (DataGridViewRow row in dgv.SelectedRows)
 				ids.Add(Convert.ToInt32(row.Cells[0].Value));
@@ -399,7 +388,7 @@ namespace DBApplicationForWork
 		void tsmiEditFields_Click(object sender, EventArgs e)
 		{
 			string name = (sender as ToolStripMenuItem).Name;
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			if(!string.IsNullOrEmpty(name))
 			{
@@ -416,7 +405,7 @@ namespace DBApplicationForWork
 		void tsmiChangeStates_Click(object sender, EventArgs e)
 		{
 			string name = (sender as ToolStripMenuItem).Name;
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			if (!string.IsNullOrEmpty(name) && tc != null && dgv != null)
 			{
@@ -430,7 +419,7 @@ namespace DBApplicationForWork
 		}
 		void tsmiPrint_Click(object sender, EventArgs e)
 		{
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			if (true)
 			{
 				Word.Application wordApp = null;
@@ -505,7 +494,7 @@ namespace DBApplicationForWork
 		void viewCheckBoxs_CheckChanged(object sender, EventArgs e)
 		{
 			CheckBox cb = sender as CheckBox;
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			int index = Convert.ToInt32(cb.Name.Split('_').Last());
 			if (cb != null && tc != null && dgv != null)
@@ -516,7 +505,7 @@ namespace DBApplicationForWork
 		void viewRadioButton_CkeckChanged(object sender, EventArgs e)
 		{
 			RadioButton rb = sender as RadioButton;
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			if (rb != null && tc != null && dgv != null)
 			{
@@ -535,7 +524,7 @@ namespace DBApplicationForWork
 		}
 		void tcDataBase_SelectedIndexChanged(object sender, EventArgs e)
 		{
-			TabControl tc = sender as TabControl;
+			UCBeautyTabControl tc = sender as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			if(dgv != null && tc != null)
 			{
@@ -556,7 +545,7 @@ namespace DBApplicationForWork
 
 		void loadDataGridView()
 		{
-			TabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as TabControl;
+			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
 			DataGridViewWithFilter dgv = this.Controls.Find(dataGrid_names[tc.SelectedIndex], true).FirstOrDefault() as DataGridViewWithFilter;
 			if (tc != null && dgv != null)
 			{
