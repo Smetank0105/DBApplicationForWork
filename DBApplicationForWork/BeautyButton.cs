@@ -12,7 +12,7 @@ namespace DBApplicationForWork
     public class BeautyButton : Button
     {
         private int borderSize = 0;
-        private int borderRadius = 10;
+        private int borderRadius = 15;
         private Color borderColor = Color.Olive;
 
         public int BorderSize { get => borderSize; set { borderSize = value; this.Invalidate(); } }

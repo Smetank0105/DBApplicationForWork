@@ -176,6 +176,7 @@ namespace DBApplicationForWork
 			BeautyButton btnAddToList = new BeautyButton();
 			btnAddToList.Name = "btnAddToList";
 			btnAddToList.Dock = DockStyle.Fill;
+			btnAddToList.BorderRadius = 10;
 			btnAddToList.Text = "Добавить";
 			btnAddToList.Click += new EventHandler(btnAddToList_Click);
 			tlpDetails.Controls.Add(btnAddToList, 0, 2);
@@ -199,6 +200,7 @@ namespace DBApplicationForWork
 			BeautyButton btnClear = new BeautyButton();
 			btnClear.Name = "btnClear";
 			btnClear.Dock = DockStyle.Fill;
+			btnClear.BorderRadius = 10;
 			btnClear.Text = "Очистить";
 			btnClear.Click += new EventHandler(btnClear_Click);
 			tlpDetails.Controls.Add(btnClear, 0, 4);

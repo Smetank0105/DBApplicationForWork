@@ -29,7 +29,7 @@ namespace DBApplicationForWork
 		string[] dataGrid_names = new string[] { "dgCartridges", "dgPrinters", "dgComputers" };
 		string[] panel_btn_names = new string[] { "Новый наряд", "Редактировать", "Изменить статус", "Печать", "Обновить", "Удалить"};
 		string[] state_names = new string[] { "", "на исполнении", "на отправку в фирму", "в фирме", "готов", "выдан", "ждёт запчастей"};
-		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.SteelBlue, Color.DeepSkyBlue, Color.ForestGreen, Color.Purple, Color.Coral};
+		Color[] state_colors = new Color[] { Color.Black, Color.Yellow, Color.Aqua, Color.DodgerBlue, Color.Lime, Color.WhiteSmoke, Color.Tomato};
 		string[] field_names = new string[] 
 		{
 			"ID",
@@ -68,7 +68,7 @@ namespace DBApplicationForWork
 			tcPanel.Dock = DockStyle.Top;
 			tcPanel.PanelBtnHeight = 30;
 			tcPanel.TabBtnWidth = 300;
-			tcPanel.Height = 130;
+			tcPanel.Height = 160;
 			this.Controls.Add(tcPanel);
 
 //Create LayoutPanel for "tpPanelMain" and "tpPanelView"
@@ -82,6 +82,7 @@ namespace DBApplicationForWork
 			TableLayoutPanel tlpView = new TableLayoutPanel();
 			tlpView.Dock = DockStyle.Fill;
 			tlpView.Padding = new Padding(10, 40, 10, 0);
+			tlpView.ForeColor = Color.FromArgb(64, 103, 135);
 			tlpView.AutoScroll = true;
 			tlpView.RowCount = 2;
 			tlpView.ColumnCount = field_names.Length - 1;
@@ -95,7 +96,9 @@ namespace DBApplicationForWork
 
 			UCBeautyTabControl tcDataBase = new UCBeautyTabControl();
 			tcDataBase.Name = "tcDataBase";
-			tcDataBase.Dock = DockStyle.Fill;
+			tcDataBase.Bounds = new Rectangle(5, 160, 975, 500);
+			tcDataBase.Anchor = (AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right) | AnchorStyles.Bottom);
+			//tcDataBase.Dock = DockStyle.Fill;
 			tcDataBase.PanelBtnDockStyle = DockStyle.Bottom;
 
             this.Controls.Add(tcDataBase);
@@ -137,6 +140,7 @@ namespace DBApplicationForWork
 					flp.Controls.Add(spacer);
 				}
 				buttonsMain[i].Size = new Size(btnWidth, btnHeight);
+				buttonsMain[i].BorderRadius = 25;
 				flp.Controls.Add(buttonsMain[i]);
 			}
 			buttonsMain[0].Click += new EventHandler(btnMainNewOrder_Click);
@@ -169,7 +173,7 @@ namespace DBApplicationForWork
 				dGrids[i].AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 				dGrids[i].CellContextMenuStripNeeded += new DataGridViewCellContextMenuStripNeededEventHandler(dataGridView_CellContextMenuNeeded);
 				dGrids[i].CellFormatting += new DataGridViewCellFormattingEventHandler(dataGridView_CellFormating);
-				//dGrids[i].DataSource = connector.SelectRecords(table_names[i]);
+				dGrids[i].DataSource = connector.SelectRecords(table_names[i]);
 				for (int j = 0; j < dGrids[i].ColumnCount; j++)
 					dGrids[i].Columns[j].SortMode = DataGridViewColumnSortMode.NotSortable;
 				if (dGrids[i].Columns.Count > 0)dGrids[i].Columns[0].Visible = false;
@@ -211,6 +215,7 @@ namespace DBApplicationForWork
 			GroupBox gb = new GroupBox();
 			gb.Text = "Ширина столбцов";
 			gb.Size = new Size(320, 50);
+			gb.ForeColor = Color.FromArgb(64, 103, 135);
 			FlowLayoutPanel flp = new FlowLayoutPanel();
 			flp.Dock = DockStyle.Fill;
 			flp.FlowDirection = FlowDirection.LeftToRight;
