@@ -22,6 +22,7 @@ namespace DBApplicationForWork
         private DockStyle panelContentDockStyle = DockStyle.Fill;
         private int panelBtnWidth = 120;
         private int panelBtnHeight = 30;
+        private Padding panelContentPadding = new Padding(0);
         private int tabBtnWidth = 120;
         private int tabBtnHeight = 30;
         private int selectedIndex = -1;
@@ -41,6 +42,7 @@ namespace DBApplicationForWork
         public DockStyle PanelContentDockStyle { get => panelContentDockStyle; set { panelContentDockStyle = value; panelContent.Dock = panelContentDockStyle; } }
         public int PanelBtnWidth { get => panelBtnWidth; set { panelBtnWidth = value; panelBtns.Width = panelBtnWidth; } }
         public int PanelBtnHeight { get => panelBtnHeight; set { panelBtnHeight = value; panelBtns.Height = panelBtnHeight; } }
+		public Padding PanelContentPadding { get => panelContentPadding; set { panelContentPadding = value; panelContent.Padding = panelContentPadding; } }
         public int TabBtnWidth { get => tabBtnWidth; set { tabBtnWidth = value; foreach (var btn in tabBtns) btn.Width = tabBtnWidth; } }
         public int TabBtnHeight { get => tabBtnHeight; set { tabBtnHeight = value; foreach (var btn in tabBtns) btn.Height = tabBtnHeight; } }
 
@@ -61,7 +63,7 @@ namespace DBApplicationForWork
         }
 
 
-        public UCBeautyTabControl()
+		public UCBeautyTabControl()
         {
             InitializeComponent();
             InitUCBeautyTabControl();

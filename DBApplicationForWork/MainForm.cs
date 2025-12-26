@@ -98,8 +98,8 @@ namespace DBApplicationForWork
 			tcDataBase.Name = "tcDataBase";
 			tcDataBase.Bounds = new Rectangle(5, 160, 975, 500);
 			tcDataBase.Anchor = (AnchorStyles)(((AnchorStyles.Top | AnchorStyles.Left) | AnchorStyles.Right) | AnchorStyles.Bottom);
-			//tcDataBase.Dock = DockStyle.Fill;
 			tcDataBase.PanelBtnDockStyle = DockStyle.Bottom;
+			tcDataBase.PanelContentPadding = new Padding(0, 0, 0, 30);
 
             this.Controls.Add(tcDataBase);
 
