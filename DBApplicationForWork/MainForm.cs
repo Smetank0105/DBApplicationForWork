@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -22,7 +23,6 @@ namespace DBApplicationForWork
 	{
 		Connector connector;
 
-		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=5;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
 		string[] table_names = new string[] { "CartridgeRecords", "PrinterRecords", "ComputerRecords" };
 		string[] database_tp_names = new string[] { "Картриджи", "Принтеры", "Компьютеры" };
@@ -60,6 +60,7 @@ namespace DBApplicationForWork
 		void initComponents()
 		{
 			this.Size = new Size(1000, 700);
+			this.Text = "Светофор";
 
 //Create TabControl "tcPanel" with TabPages "tpMain" and "tpView"
 
@@ -331,7 +332,7 @@ namespace DBApplicationForWork
 
 		void MainForm_Load(object sender, EventArgs e)
 		{
-			connector = new Connector(connectionString);
+			connector = new Connector(ConfigurationManager.ConnectionStrings["BOX_3"].ConnectionString);
 			initComponents();
 		}
 		void btnMainNewOrder_Click(object sender, EventArgs e)

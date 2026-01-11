@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -14,7 +15,6 @@ namespace DBApplicationForWork
 	public partial class UpdateRecordsForm : Form
 	{
 		Connector connector;
-		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[] names = new string[] { "", "номер наряда", "дата записи", "номер заявки", "подразделение", "название оборудования", "инвенратный номер", "замечания", "дата передачи в фирму", "номер акта фирмы", "дата готовности", "дата выдачи" };
 		string[][] table_names =
 		{
@@ -37,7 +37,7 @@ namespace DBApplicationForWork
 		}
 		void UpdateRecordsForm_Load(object sender, EventArgs e)
 		{
-			connector = new Connector(connectionString);
+			connector = new Connector(ConfigurationManager.ConnectionStrings["BOX_3"].ConnectionString);
 			initComponents();
 		}
 		void initComponents()

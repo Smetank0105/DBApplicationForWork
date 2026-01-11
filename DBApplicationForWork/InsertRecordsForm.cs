@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Configuration;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -13,7 +14,6 @@ namespace DBApplicationForWork
 	public partial class InsertRecordsForm : Form
 	{
 		Connector connector;
-		const string connectionString = "Data Source=SMETANK\\SQLEXPRESS;Initial Catalog=BOX_3;Integrated Security=True;Connect Timeout=30;Encrypt=True;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
 		string[][] table_names =
 {
 			new string[] { "", "", "", "RequestNumbers", "Departments", "Cartridges", "CartridgeInventorys" },
@@ -33,7 +33,7 @@ namespace DBApplicationForWork
 
 		private void MainForm_Load(object sender, EventArgs e)
 		{
-			connector = new Connector(connectionString);
+			connector = new Connector(ConfigurationManager.ConnectionStrings["BOX_3"].ConnectionString);
 			cartridges = new List<short>();
 			inventorys = new List<int>();
 			initComponents();
@@ -42,6 +42,7 @@ namespace DBApplicationForWork
 		{
 //Fixed size for this form
 			this.Size = new Size(400, 540);
+			this.Text = "Новый наряд";
 			this.FormBorderStyle = FormBorderStyle.FixedDialog;
 			this.MaximizeBox = false;
 			this.MinimizeBox = false;
