@@ -438,11 +438,11 @@ namespace DBApplicationForWork
 					wordApp.Visible = false;
 
 					if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex == 0)
-						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\order.docx"));
+						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, "order.docx"));
 					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex > 0)
-						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\order_comp.docx"));
+						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, "order_comp.docx"));
 					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
-						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, @"..\..\act.docx"));
+						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, "act.docx"));
 
 					wordDoc = wordApp.Documents.Open(documentPath);
 

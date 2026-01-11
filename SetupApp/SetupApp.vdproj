@@ -15,6 +15,18 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_0EF408FCD96B4DCB92EB161AF0871A61"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_1407882A1E1F4FA3BE0523499FB9C08E"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_161D52A6428AFFAC63D2203D594E3FC6"
         "OwnerKey" = "8:_C468AD54F57C4988BE93B567ED0C1B76"
         "MsmSig" = "8:_UNDEFINED"
@@ -33,14 +45,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_161D52A6428AFFAC63D2203D594E3FC6"
+        "MsmKey" = "8:_D59C419ED05D431DB6C33C08E849CEC8"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
         "OwnerKey" = "8:_C468AD54F57C4988BE93B567ED0C1B76"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_UNDEFINED"
+        "OwnerKey" = "8:_161D52A6428AFFAC63D2203D594E3FC6"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -61,6 +79,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
         "Release"
         {
@@ -77,6 +103,14 @@
         "PrivateKeyFile" = "8:"
         "TimeStampServer" = "8:"
         "InstallerBootstrapper" = "3:2"
+            "BootstrapperCfg:{63ACBE69-63AA-4F98-B2B6-99F9E24495F2}"
+            {
+            "Enabled" = "11:TRUE"
+            "PromptEnabled" = "11:TRUE"
+            "PrerequisitesLocation" = "2:1"
+            "Url" = "8:"
+            "ComponentsUrl" = "8:"
+            }
         }
     }
     "Deployable"
@@ -106,6 +140,46 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_0EF408FCD96B4DCB92EB161AF0871A61"
+            {
+            "SourcePath" = "8:..\\DBApplicationForWork\\bin\\Debug\\order.docx"
+            "TargetName" = "8:order.docx"
+            "Tag" = "8:"
+            "Folder" = "8:_06C23FD465C540CDB81678F894FC1D60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1407882A1E1F4FA3BE0523499FB9C08E"
+            {
+            "SourcePath" = "8:..\\DBApplicationForWork\\bin\\Debug\\order_comp.docx"
+            "TargetName" = "8:order_comp.docx"
+            "Tag" = "8:"
+            "Folder" = "8:_06C23FD465C540CDB81678F894FC1D60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_161D52A6428AFFAC63D2203D594E3FC6"
             {
             "AssemblyRegister" = "3:1"
@@ -141,6 +215,26 @@
             {
             "SourcePath" = "8:..\\Icon.ico"
             "TargetName" = "8:Icon.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_06C23FD465C540CDB81678F894FC1D60"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_D59C419ED05D431DB6C33C08E849CEC8"
+            {
+            "SourcePath" = "8:..\\DBApplicationForWork\\bin\\Debug\\act.docx"
+            "TargetName" = "8:act.docx"
             "Tag" = "8:"
             "Folder" = "8:_06C23FD465C540CDB81678F894FC1D60"
             "Condition" = "8:"
