@@ -622,7 +622,7 @@ namespace DBApplicationForWork
 						table1.Cell(3, 2).Range.Text = dgv.CurrentRow.Cells[3].Value.ToString();
 					table1.Cell(5, 2).Range.Text = dgv.CurrentRow.Cells[4].Value.ToString();
 					table2.Cell(3, 1).Range.Text = dgv.CurrentRow.Cells[6].Value.ToString();
-					table2.Cell(3, 4).Range.Text = dgv.CurrentRow.Cells[5].Value.ToString();
+					table2.Cell(3, 3).Range.Text = dgv.CurrentRow.Cells[5].Value.ToString();
 				}
 				else
 				{
