@@ -22,6 +22,7 @@ namespace DBApplicationForWork
 	public partial class MainForm : Form
 	{
 		Connector connector;
+		private List<object> wordObjects = new List<object>();
 
 		string[] panel_tp_names = new string[] { "Главная", "Отображение"};
 		string[] table_names = new string[] { "CartridgeRecords", "PrinterRecords", "ComputerRecords" };
@@ -53,6 +54,7 @@ namespace DBApplicationForWork
 		{
 			InitializeComponent();
 			this.Load += new System.EventHandler(this.MainForm_Load);
+			this.FormClosing += new FormClosingEventHandler(this.MainForm_Closing);
 		}
 
 //Controls
@@ -335,6 +337,24 @@ namespace DBApplicationForWork
 			connector = new Connector(ConfigurationManager.ConnectionStrings["BOX_3"].ConnectionString);
 			initComponents();
 		}
+		void MainForm_Closing(object sender, EventArgs e)
+        {
+			foreach (var obj in wordObjects)
+			{
+				try
+				{
+					if (obj != null)
+					{
+						System.Runtime.InteropServices.Marshal.ReleaseComObject(obj);
+					}
+				}
+				catch (Exception ex)
+				{
+					System.Diagnostics.Debug.WriteLine($"Ошибка при освобождении COM-объекта: {ex.Message}");
+				}
+			}
+			wordObjects.Clear();
+		}
 		void btnMainNewOrder_Click(object sender, EventArgs e)
 		{
 			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
@@ -427,7 +447,7 @@ namespace DBApplicationForWork
 		void tsmiPrint_Click(object sender, EventArgs e)
 		{
 			UCBeautyTabControl tc = this.Controls.Find("tcDataBase", true).FirstOrDefault() as UCBeautyTabControl;
-			if (true)
+			if (tc != null)
 			{
 				Word.Application wordApp = null;
 				Word.Document wordDoc = null;
@@ -435,7 +455,7 @@ namespace DBApplicationForWork
 				try
 				{
 					wordApp = new Word.Application();
-					wordApp.Visible = false;
+					wordApp.Visible = true;
 
 					if ((sender as ToolStripMenuItem).Name == "tsmiMainP_order" && tc.SelectedIndex == 0)
 						documentPath = Path.GetFullPath(Path.Combine(Application.StartupPath, "order.docx"));
@@ -453,21 +473,23 @@ namespace DBApplicationForWork
 					else if ((sender as ToolStripMenuItem).Name == "tsmiMainP_act")
 						FillActTableForCartridges(tc.SelectedIndex, wordDoc);
 
-					//wordApp.ActiveWindow.View.Type = Word.WdViewType.wdPrintPreview;
-					//MessageBox.Show("Нажмите OK для печати после предпросмотра");
+                    wordApp.ActiveWindow.View.Type = Word.WdViewType.wdPrintPreview;
 
-					PrintDialog printDialog = new PrintDialog();
-					PrinterSettings settings = new PrinterSettings();
+					wordObjects.Add(wordApp);
+					wordObjects.Add(wordDoc);
 
-					printDialog.PrinterSettings = settings;
-					printDialog.AllowSomePages = true;
-					printDialog.ShowNetwork = true;
+					//PrintDialog printDialog = new PrintDialog();
+					//PrinterSettings settings = new PrinterSettings();
 
-					if (printDialog.ShowDialog() == DialogResult.OK)
-					{
-						wordDoc.PrintOut();
-						MessageBox.Show("Документ отправлен на печать!", "Успех",MessageBoxButtons.OK, MessageBoxIcon.Information);
-					}
+					//printDialog.PrinterSettings = settings;
+					//printDialog.AllowSomePages = true;
+					//printDialog.ShowNetwork = true;
+
+					//if (printDialog.ShowDialog() == DialogResult.OK)
+					//{
+					//	wordDoc.PrintOut();
+					//	MessageBox.Show("Документ отправлен на печать!", "Успех",MessageBoxButtons.OK, MessageBoxIcon.Information);
+					//}
 
 				}
 				catch (Exception ex)
@@ -475,23 +497,27 @@ namespace DBApplicationForWork
 					MessageBox.Show($"Ошибка: {ex.Message}", "Ошибка",
 						MessageBoxButtons.OK, MessageBoxIcon.Error);
 				}
-				finally
-				{
-					if (wordDoc != null)
-					{
-						wordDoc.Close(false);
-						System.Runtime.InteropServices.Marshal.ReleaseComObject(wordDoc);
-					}
+				//finally
+				//{
+				//	if (wordDoc != null)
+				//	{
+				//		try { wordDoc.Close(false); }
+				//		catch { }
+				//		System.Runtime.InteropServices.Marshal.ReleaseComObject(wordDoc);
+				//		wordDoc = null;
+				//	}
 
-					if (wordApp != null)
-					{
-						wordApp.Quit(false);
-						System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp);
-					}
+				//	if (wordApp != null)
+				//	{
+				//		try { wordApp.Quit(false); }
+				//		catch { }
+				//		System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp);
+				//		wordApp = null;
+				//	}
 
-					GC.Collect();
-					GC.WaitForPendingFinalizers();
-				} 
+				//	GC.Collect();
+				//	GC.WaitForPendingFinalizers();
+				//} 
 			}
 			else
 			{
