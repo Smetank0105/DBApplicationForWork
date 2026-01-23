@@ -132,7 +132,13 @@ namespace DBApplicationForWork
 			base.OnColumnAdded(e);
 		}
 
-		void header_FilterButtonClicked(object sender, ColumnFilterClickedEventArg e)
+        protected override void OnDataSourceChanged(EventArgs e)
+        {
+            base.OnDataSourceChanged(e);
+			ApplyFilter();
+        }
+
+        void header_FilterButtonClicked(object sender, ColumnFilterClickedEventArg e)
 		{
 			int widthTool = GetWidthColumn(e.ColumnIndex) + 50;
 			if (widthTool < 110) widthTool = 110;
@@ -331,14 +337,30 @@ namespace DBApplicationForWork
 		}
 		private void ApplyFilter()
 		{
-			foreach(FilterStatus i in Filter)
-			{
-				if(i.check == false)
+            if (checkBox.Items.Count > 0 && checkBox.GetItemChecked(0))
+            {
+                foreach (FilterStatus i in Filter)
+                {
+                    if (i.check == false)
+                    {
+                        if (strFilter.Length == 0)
+                            strFilter = strFilter + ("[" + i.columnName + "] <> '" + i.valueString + "' ");
+                        else
+                            strFilter = strFilter + (" AND [" + i.columnName + "] <> '" + i.valueString + "' ");
+                    }
+                } 
+            }
+            else
+            {
+				foreach (FilterStatus i in Filter)
 				{
-					if (strFilter.Length == 0)
-						strFilter = strFilter + ("[" + i.columnName + "] <> '" + i.valueString + "' ");
-					else
-						strFilter = strFilter + (" AND [" + i.columnName + "] <> '" + i.valueString + "' ");
+					if (i.check == true)
+					{
+						if (strFilter.Length == 0)
+							strFilter = strFilter + ("[" + i.columnName + "] = '" + i.valueString + "' ");
+						else
+							strFilter = strFilter + (" OR [" + i.columnName + "] = '" + i.valueString + "' ");
+					}
 				}
 			}
 			(this.DataSource as DataTable).DefaultView.RowFilter = strFilter;
